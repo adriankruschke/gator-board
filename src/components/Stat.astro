@@ -1,0 +1,22 @@
+---
+interface Props {
+  stat: string;
+  label: string;
+  icon: string;
+}
+
+const { stat, label, icon } = Astro.props;
+---
+
+<div class={`stat stat-${icon}`}>
+  <button class="arrow arrow-left" data-stat={stat} data-delta="-1" aria-label={`Decrease ${label}`}>
+    <svg viewBox="0 0 40 60" aria-hidden="true"><path d="M34 6 8 30l26 24c2 2 4 1 4-2V8c0-3-2-4-4-2Z" /></svg>
+  </button>
+  <div class="icon">
+    <img src={`/img/${icon}.webp`} alt="" draggable="false" />
+    <output class="value" data-value={stat} aria-label={label}><span></span></output>
+  </div>
+  <button class="arrow arrow-right" data-stat={stat} data-delta="1" aria-label={`Increase ${label}`}>
+    <svg viewBox="0 0 40 60" aria-hidden="true"><path d="M6 6l26 24L6 54c-2 2-4 1-4-2V8c0-3 2-4 4-2Z" /></svg>
+  </button>
+</div>

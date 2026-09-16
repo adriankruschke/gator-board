@@ -1,6 +1,6 @@
 // Tracker state, campaign log (undo/redo) and cookie persistence.
 
-export type Stat = 'h' | 's';
+export type Stat = 'r' | 'h' | 's';
 
 export interface Entry {
   k: Stat;
@@ -11,6 +11,7 @@ export interface Entry {
 }
 
 export interface State {
+  r: number;
   h: number;
   s: number;
   log: Entry[];
@@ -18,7 +19,7 @@ export interface State {
   cursor: number;
 }
 
-export const DEFAULTS = { h: 7, s: 8 } as const;
+export const DEFAULTS = { r: 5, h: 7, s: 8 } as const;
 export const MIN = 0;
 export const MAX = 99;
 const MAX_ENTRIES = 500;
@@ -30,7 +31,7 @@ const CHUNK = 3500;
 const MAX_CHUNKS = 20;
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 400;
 
-export const initialState = (): State => ({ h: DEFAULTS.h, s: DEFAULTS.s, log: [], cursor: 0 });
+export const initialState = (): State => ({ ...DEFAULTS, log: [], cursor: 0 });
 
 const clamp = (n: number) => Math.min(MAX, Math.max(MIN, n));
 const now = () => Math.floor(Date.now() / 1000);
@@ -71,26 +72,28 @@ export function redo(state: State): State {
   return { ...state, [e.k]: e.to, cursor: state.cursor + 1 };
 }
 
-// ---- Serialization: "v1|h|s|cursor|k<from>.<to>.<t36>,..." (cookie-safe characters only)
+// ---- Serialization: "v2|r|h|s|cursor|k<from>.<to>.<t36>,..." (cookie-safe characters only)
 
 function serialize(s: State): string {
   const entries = s.log.map((e) => `${e.k}${e.from}.${e.to}.${e.t.toString(36)}`).join(',');
-  return `v1|${s.h}|${s.s}|${s.cursor}|${entries}`;
+  return `v2|${s.r}|${s.h}|${s.s}|${s.cursor}|${entries}`;
 }
 
 function deserialize(raw: string): State | null {
   const parts = raw.split('|');
-  if (parts.length !== 5 || parts[0] !== 'v1') return null;
-  const [h, s, cursor] = parts.slice(1, 4).map(Number);
+  // v1 predates the resource tracker: "v1|h|s|cursor|entries".
+  if (parts[0] === 'v1' && parts.length === 5) parts.splice(0, 1, 'v2', String(DEFAULTS.r));
+  if (parts.length !== 6 || parts[0] !== 'v2') return null;
+  const [r, h, s, cursor] = parts.slice(1, 5).map(Number);
   const log: Entry[] = [];
-  for (const item of parts[4] ? parts[4].split(',') : []) {
-    const m = /^([hs])(\d+)\.(\d+)\.([0-9a-z]+)$/.exec(item);
+  for (const item of parts[5] ? parts[5].split(',') : []) {
+    const m = /^([rhs])(\d+)\.(\d+)\.([0-9a-z]+)$/.exec(item);
     if (!m) return null;
     log.push({ k: m[1] as Stat, from: clamp(+m[2]), to: clamp(+m[3]), t: parseInt(m[4], 36) });
   }
   const ok = (n: number) => Number.isInteger(n) && n >= MIN && n <= MAX;
-  if (!ok(h) || !ok(s) || !Number.isInteger(cursor) || cursor < 0 || cursor > log.length) return null;
-  return { h, s, log, cursor };
+  if (![r, h, s].every(ok) || !Number.isInteger(cursor) || cursor < 0 || cursor > log.length) return null;
+  return { r, h, s, log, cursor };
 }
 
 // ---- Cookies (chunked, since a single cookie is limited to ~4KB)

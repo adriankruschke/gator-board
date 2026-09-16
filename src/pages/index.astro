@@ -3,6 +3,8 @@ import '@fontsource/eb-garamond/500.css';
 import '@fontsource/eb-garamond/600.css';
 import '@fontsource/eb-garamond/500-italic.css';
 import '../styles/app.css';
+import Stat from '../components/Stat.astro';
+import { DEFAULTS } from '../scripts/store';
 
 const icons = {
   undo: 'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11',
@@ -45,24 +47,13 @@ const icons = {
         draggable="false"
       />
 
-      <section class="stats" aria-label="Health and sanity">
-        {[
-          { key: 'h', label: 'Health', icon: 'heart' },
-          { key: 's', label: 'Sanity', icon: 'brain' },
-        ].map(({ key, label, icon }) => (
-          <div class={`stat stat-${icon}`}>
-            <button class="arrow arrow-left" data-stat={key} data-delta="-1" aria-label={`Decrease ${label}`}>
-              <svg viewBox="0 0 40 60" aria-hidden="true"><path d="M34 6 8 30l26 24c2 2 4 1 4-2V8c0-3-2-4-4-2Z" /></svg>
-            </button>
-            <div class="icon">
-              <img src={`/img/${icon}.webp`} alt="" draggable="false" />
-              <output class="value" data-value={key} aria-label={label}><span></span></output>
-            </div>
-            <button class="arrow arrow-right" data-stat={key} data-delta="1" aria-label={`Increase ${label}`}>
-              <svg viewBox="0 0 40 60" aria-hidden="true"><path d="M6 6l26 24L6 54c-2 2-4 1-4-2V8c0-3 2-4 4-2Z" /></svg>
-            </button>
-          </div>
-        ))}
+      <section class="stats stats-resource" aria-label="Resources">
+        <Stat stat="r" label="Resources" icon="crate" />
+      </section>
+
+      <section class="stats stats-main" aria-label="Health and sanity">
+        <Stat stat="h" label="Health" icon="heart" />
+        <Stat stat="s" label="Sanity" icon="brain" />
       </section>
 
       <nav class="controls" aria-label="Controls">
@@ -90,7 +81,7 @@ const icons = {
           </button>
         </header>
         <p class="log-summary">
-          Health <strong data-summary="h"></strong><span class="dot">·</span>Sanity <strong data-summary="s"></strong>
+          Resources <strong data-summary="r"></strong><span class="dot">·</span>Health <strong data-summary="h"></strong><span class="dot">·</span>Sanity <strong data-summary="s"></strong>
         </p>
         <div class="log-actions">
           <button class="ink-btn" data-action="undo">
@@ -110,7 +101,8 @@ const icons = {
         <div class="confirm-card">
           <h2 id="confirm-title">Reset the campaign?</h2>
           <p id="confirm-text">
-            Health and sanity go back to <strong>7</strong> and <strong>8</strong>, and the entire campaign log is erased.
+            Resources, health and sanity go back to <strong>{DEFAULTS.r}</strong>, <strong>{DEFAULTS.h}</strong> and <strong>{DEFAULTS.s}</strong>,
+            and the entire campaign log is erased.
             This can’t be undone.
           </p>
           <div class="confirm-actions">
@@ -129,7 +121,7 @@ const icons = {
       import { load, save, clear, change, undo, redo, canUndo, canRedo, initialState, MIN, MAX, DEFAULTS } from '../scripts/store';
       import type { State, Stat } from '../scripts/store';
 
-      const NAMES: Record<Stat, string> = { h: 'Health', s: 'Sanity' };
+      const NAMES: Record<Stat, string> = { r: 'Resources', h: 'Health', s: 'Sanity' };
       const stage = document.getElementById('stage')!;
       const logEl = document.getElementById('log')!;
       const listEl = document.getElementById('log-list')!;
@@ -178,7 +170,7 @@ const icons = {
         }
         rows.push(
           `<li class="entry origin"><span class="entry-stat">Start</span>` +
-            `<span class="entry-change">Health ${DEFAULTS.h} · Sanity ${DEFAULTS.s}</span></li>`,
+            `<span class="entry-change">Resources ${DEFAULTS.r} · Health ${DEFAULTS.h} · Sanity ${DEFAULTS.s}</span></li>`,
         );
         listEl.innerHTML = rows.join('');
         stage.classList.add('ready');

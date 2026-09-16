@@ -9,6 +9,8 @@
   --health-dark: #6d0b0e;
   --sanity: #1f4f96;
   --sanity-dark: #0c2350;
+  --resource: #8a4f1d;
+  --resource-dark: #3b1a08;
   --serif: 'EB Garamond', 'Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
 }
 
@@ -86,13 +88,30 @@ svg {
 
 .stats {
   position: absolute;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.stats-main {
   left: 57.4%;
   width: 40.6%;
   top: 78.6%;
   height: 14%;
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
+}
+
+/* Sits over the illustration, just left of the text box, on its own parchment plaque. */
+.stats-resource {
+  left: 33.4%;
+  width: 21%;
+  top: 79.3%;
+  height: 12.6%;
+  border: 0.3cqw solid var(--leather);
+  border-radius: 1.2cqw;
+  background:
+    radial-gradient(120% 90% at 30% 20%, rgb(255 255 255 / 0.4), transparent 60%),
+    linear-gradient(180deg, var(--paper), var(--paper-deep));
+  box-shadow: 0 0.6cqw 1.8cqw rgb(0 0 0 / 0.55), inset 0 0 0 0.18cqw var(--brass);
 }
 
 .stat {
@@ -121,6 +140,10 @@ svg {
 
 .stat-brain .icon img {
   width: 9.1cqw;
+}
+
+.stat-crate .icon img {
+  width: 7cqw;
 }
 
 .value {
@@ -157,10 +180,21 @@ svg {
   -webkit-text-stroke-color: var(--sanity-dark);
 }
 
+.stat-crate .value span {
+  font-size: 6.2cqw;
+  -webkit-text-stroke: 0.42cqw var(--resource-dark);
+  text-shadow: 0 0 0.6cqw rgb(40 15 5 / 0.7);
+  translate: 0 0.15cqw;
+}
+
 .value[data-len='2'] span {
   font-size: 6cqw;
   letter-spacing: -0.06em;
   transform: scaleX(0.84);
+}
+
+.stat-crate .value[data-len='2'] span {
+  font-size: 5cqw;
 }
 
 .stage:not(.ready) .value span {
@@ -194,6 +228,10 @@ svg {
 
 .stat-brain .arrow {
   color: #173a70;
+}
+
+.stat-crate .arrow {
+  color: #5a3113;
 }
 
 .arrow:active:not(:disabled) {
@@ -393,7 +431,7 @@ svg {
 
 .entry {
   display: grid;
-  grid-template-columns: 7.2cqw 1fr auto;
+  grid-template-columns: 9.4cqw 1fr auto;
   grid-template-rows: auto auto;
   column-gap: 1cqw;
   align-items: baseline;
@@ -403,6 +441,10 @@ svg {
 
 .entry-stat {
   font-weight: 600;
+}
+
+.entry-r .entry-stat {
+  color: var(--resource);
 }
 
 .entry-h .entry-stat {
