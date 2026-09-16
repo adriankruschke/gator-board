@@ -443,6 +443,21 @@ svg {
   font-weight: 600;
 }
 
+.entry-bag .entry-stat {
+  color: var(--ink-soft);
+}
+
+.entry-bag .entry-delta {
+  max-width: 12cqw;
+  font-size: 1.45cqw;
+  font-weight: 500;
+  text-align: right;
+}
+
+.entry-wide {
+  grid-column: 2 / 4;
+}
+
 .entry-r .entry-stat {
   color: var(--resource);
 }

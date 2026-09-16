@@ -3,13 +3,16 @@ import '@fontsource/eb-garamond/500.css';
 import '@fontsource/eb-garamond/600.css';
 import '@fontsource/eb-garamond/500-italic.css';
 import '../styles/app.css';
+import '../styles/bag.css';
 import Stat from '../components/Stat.astro';
-import { DEFAULTS } from '../scripts/store';
+import ChaosBag from '../components/ChaosBag.astro';
+import { tokenSprite } from '../scripts/tokenArt';
 
 const icons = {
   undo: 'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11',
   redo: 'm15 14 5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13',
   log: 'M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20M8 7h8M8 11h6',
+  bag: 'M9 3h6l-1.5 3.5h-3zM10.5 6.5C6 8.5 3.5 12.5 4 16.5 4.5 20 7.5 21.5 12 21.5s7.5-1.5 8-5c.5-4-2-8-6.5-10M9.5 13.5h5',
   fullscreen: 'M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3',
   close: 'M18 6 6 18M6 6l12 12',
 };
@@ -33,6 +36,7 @@ const icons = {
     <title>Gator Board</title>
   </head>
   <body>
+    <Fragment set:html={tokenSprite()} />
     <div class="backdrop" aria-hidden="true"></div>
 
     <main class="stage" id="stage">
@@ -62,6 +66,9 @@ const icons = {
         </button>
         <button class="round round-main" data-action="open-log" aria-label="Open campaign log">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.log} /></svg>
+        </button>
+        <button class="round round-main" data-action="open-bag" aria-label="Open chaos bag">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.bag} /></svg>
         </button>
         <button class="round" data-action="redo" aria-label="Redo">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.redo} /></svg>
@@ -97,17 +104,15 @@ const icons = {
         </footer>
       </aside>
 
+      <ChaosBag />
+
       <div class="confirm" id="confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-text" hidden>
         <div class="confirm-card">
-          <h2 id="confirm-title">Reset the campaign?</h2>
-          <p id="confirm-text">
-            Resources, health and sanity go back to <strong>{DEFAULTS.r}</strong>, <strong>{DEFAULTS.h}</strong> and <strong>{DEFAULTS.s}</strong>,
-            and the entire campaign log is erased.
-            This can’t be undone.
-          </p>
+          <h2 id="confirm-title"></h2>
+          <p id="confirm-text"></p>
           <div class="confirm-actions">
-            <button class="ink-btn" data-action="cancel-reset">Keep playing</button>
-            <button class="ink-btn danger solid" data-action="confirm-reset">Reset everything</button>
+            <button class="ink-btn" data-action="confirm-cancel">Cancel</button>
+            <button class="ink-btn danger solid" data-action="confirm-ok"></button>
           </div>
         </div>
       </div>
@@ -118,148 +123,7 @@ const icons = {
     </div>
 
     <script>
-      import { load, save, clear, change, undo, redo, canUndo, canRedo, initialState, MIN, MAX, DEFAULTS } from '../scripts/store';
-      import type { State, Stat } from '../scripts/store';
-
-      const NAMES: Record<Stat, string> = { r: 'Resources', h: 'Health', s: 'Sanity' };
-      const stage = document.getElementById('stage')!;
-      const logEl = document.getElementById('log')!;
-      const listEl = document.getElementById('log-list')!;
-      const confirmEl = document.getElementById('confirm')!;
-      const scrim = stage.querySelector<HTMLElement>('.scrim')!;
-      const $$ = <T extends Element>(sel: string) => Array.from(stage.querySelectorAll<T>(sel));
-
-      let state: State = load();
-
-      const timeFmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
-      const dayFmt = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
-
-      function formatTime(t: number) {
-        const d = new Date(t * 1000);
-        const today = new Date().toDateString() === d.toDateString();
-        return today ? timeFmt.format(d) : `${dayFmt.format(d)}, ${timeFmt.format(d)}`;
-      }
-
-      function render() {
-        for (const out of $$<HTMLOutputElement>('[data-value]')) {
-          const v = String(state[out.dataset.value as Stat]);
-          out.dataset.len = String(v.length);
-          out.firstElementChild!.textContent = v;
-        }
-        for (const btn of $$<HTMLButtonElement>('.arrow')) {
-          const v = state[btn.dataset.stat as Stat];
-          btn.disabled = Number(btn.dataset.delta) < 0 ? v <= MIN : v >= MAX;
-        }
-        for (const b of $$<HTMLButtonElement>('[data-action="undo"]')) b.disabled = !canUndo(state);
-        for (const b of $$<HTMLButtonElement>('[data-action="redo"]')) b.disabled = !canRedo(state);
-        for (const el of $$<HTMLElement>('[data-summary]')) el.textContent = String(state[el.dataset.summary as Stat]);
-
-        const rows: string[] = [];
-        for (let i = state.log.length - 1; i >= 0; i--) {
-          const e = state.log[i];
-          const delta = e.to - e.from;
-          const undone = i >= state.cursor;
-          rows.push(
-            `<li class="entry entry-${e.k}${undone ? ' undone' : ''}${i === state.cursor - 1 ? ' current' : ''}">` +
-              `<span class="entry-stat">${NAMES[e.k]}</span>` +
-              `<span class="entry-change">${e.from} <span class="to">→</span> ${e.to}</span>` +
-              `<span class="entry-delta">${delta > 0 ? '+' : '−'}${Math.abs(delta)}</span>` +
-              `<span class="entry-time">${undone ? 'undone' : formatTime(e.t)}</span>` +
-            `</li>`,
-          );
-        }
-        rows.push(
-          `<li class="entry origin"><span class="entry-stat">Start</span>` +
-            `<span class="entry-change">Resources ${DEFAULTS.r} · Health ${DEFAULTS.h} · Sanity ${DEFAULTS.s}</span></li>`,
-        );
-        listEl.innerHTML = rows.join('');
-        stage.classList.add('ready');
-      }
-
-      function commit(next: State) {
-        if (next === state) return;
-        state = save(next);
-        render();
-      }
-
-      function setLogOpen(open: boolean) {
-        logEl.classList.toggle('open', open);
-        logEl.setAttribute('aria-hidden', String(!open));
-        logEl.toggleAttribute('inert', !open);
-        scrim.hidden = !open;
-        if (open) listEl.scrollTop = 0;
-      }
-
-      function setConfirmOpen(open: boolean) {
-        confirmEl.hidden = !open;
-        if (open) confirmEl.querySelector<HTMLButtonElement>('[data-action="cancel-reset"]')!.focus();
-      }
-
-      const fsTarget = document.documentElement as HTMLElement & { webkitRequestFullscreen?: () => void };
-      const fsDoc = document as Document & { webkitFullscreenElement?: Element; webkitExitFullscreen?: () => void };
-      const fsSupported = !!(fsTarget.requestFullscreen || fsTarget.webkitRequestFullscreen);
-      stage.querySelector<HTMLElement>('[data-action="fullscreen"]')!.hidden = !fsSupported;
-
-      function toggleFullscreen() {
-        if (document.fullscreenElement || fsDoc.webkitFullscreenElement) {
-          (document.exitFullscreen?.bind(document) ?? fsDoc.webkitExitFullscreen?.bind(document))?.();
-        } else {
-          (fsTarget.requestFullscreen?.bind(fsTarget) ?? fsTarget.webkitRequestFullscreen?.bind(fsTarget))?.();
-        }
-      }
-
-      const actions: Record<string, () => void> = {
-        undo: () => commit(undo(state)),
-        redo: () => commit(redo(state)),
-        'open-log': () => setLogOpen(true),
-        'close-log': () => setLogOpen(false),
-        'ask-reset': () => setConfirmOpen(true),
-        'cancel-reset': () => setConfirmOpen(false),
-        'confirm-reset': () => {
-          clear();
-          state = initialState();
-          setConfirmOpen(false);
-          render();
-        },
-        fullscreen: toggleFullscreen,
-      };
-
-      stage.addEventListener('click', (ev) => {
-        const target = (ev.target as Element).closest<HTMLElement>('[data-action], [data-stat]');
-        if (!target || (target as HTMLButtonElement).disabled) return;
-        if (target.dataset.stat) {
-          commit(change(state, target.dataset.stat as Stat, Number(target.dataset.delta)));
-        } else {
-          actions[target.dataset.action!]?.();
-        }
-      });
-
-      confirmEl.addEventListener('click', (ev) => {
-        if (ev.target === confirmEl) setConfirmOpen(false);
-      });
-
-      document.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Escape') {
-          if (!confirmEl.hidden) setConfirmOpen(false);
-          else setLogOpen(false);
-          return;
-        }
-        if (!confirmEl.hidden) return;
-        const mod = ev.metaKey || ev.ctrlKey;
-        if (mod && ev.key.toLowerCase() === 'z') {
-          ev.preventDefault();
-          actions[ev.shiftKey ? 'redo' : 'undo']();
-        } else if (mod && ev.key.toLowerCase() === 'y') {
-          ev.preventDefault();
-          actions.redo();
-        }
-      });
-
-      // Keep iPad pinch / double-tap gestures from zooming the board.
-      document.addEventListener('gesturestart', (ev) => ev.preventDefault());
-      document.addEventListener('dblclick', (ev) => ev.preventDefault());
-
-      render();
+      import '../scripts/app';
     </script>
   </body>
 </html>

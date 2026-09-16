@@ -1,0 +1,101 @@
+---
+import { CAMPAIGNS, DIFFICULTIES, DIFFICULTY_NAMES, TOKENS, TOKEN_NAMES } from '../scripts/tokens';
+import { tokenUse } from '../scripts/tokenArt';
+
+const groups = [...new Set(CAMPAIGNS.map((c) => c.group))];
+const close = 'M18 6 6 18M6 6l12 12';
+const lock = 'M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z';
+---
+
+<div class="bag-scrim" data-action="close-bag" hidden></div>
+
+<section class="bag" id="bag" aria-label="Chaos bag" aria-hidden="true" inert>
+  <header class="bag-head">
+    <div>
+      <h1>Chaos Bag</h1>
+      <p class="bag-sub" id="bag-sub"></p>
+    </div>
+    <button class="icon-btn" data-action="close-bag" aria-label="Close chaos bag">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d={close} /></svg>
+    </button>
+  </header>
+
+  <div class="bag-body">
+    <div class="bag-draw">
+      <div class="drawn-row" id="drawn-row" aria-label="Earlier tokens this pull"></div>
+      <button class="big-token" id="big-token" data-action="big-token"></button>
+      <p class="draw-hint" id="draw-hint"></p>
+
+      <div class="draw-actions" id="draw-idle">
+        <span class="draw-label">Draw</span>
+        {[1, 2, 3, 4, 5].map((n) => <button class="chip" data-draw={n} aria-label={`Draw ${n}`}>{n}</button>)}
+      </div>
+      <div class="draw-actions stacked" id="draw-active" hidden>
+        <button class="ink-btn" data-draw="1">Draw another</button>
+        <button class="ink-btn" data-action="return-all">Return tokens</button>
+        <button class="ink-btn subtle wide" data-action="return-keep" hidden>Return, but keep drawn bless &amp; curse in the bag</button>
+      </div>
+
+      <div class="sealed" id="sealed" hidden>
+        <div class="sealed-head">
+          <h2>Sealed</h2>
+          <button class="text-btn" data-action="release-all">Release all</button>
+        </div>
+        <div class="sealed-row" id="sealed-row"></div>
+        <p class="fine">Tap a sealed token to release it.</p>
+      </div>
+    </div>
+
+    <div class="bag-side">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="contents" aria-selected="true">Contents</button>
+        <button class="tab" role="tab" data-tab="setup" aria-selected="false">Set up</button>
+      </div>
+
+      <div class="tab-panel" id="tab-contents" role="tabpanel">
+        <ul class="bag-rows">
+          {TOKENS.map((token) => (
+            <li class="bag-row" data-token={token}>
+              <Fragment set:html={tokenUse(token, 'token row-token')} />
+              <span class="row-name">{TOKEN_NAMES[token]}<span class="row-note"></span></span>
+              <div class="stepper">
+                <button data-count="-1" aria-label={`Remove a ${TOKEN_NAMES[token]} token`}>−</button>
+                <output></output>
+                <button data-count="1" aria-label={`Add a ${TOKEN_NAMES[token]} token`}>+</button>
+              </div>
+              <button class="seal-btn" data-seal aria-label={`Seal a ${TOKEN_NAMES[token]} token`}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d={lock} /></svg>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <button class="ink-btn subtle wide" data-action="clear-blurse" hidden>Remove all bless &amp; curse tokens</button>
+      </div>
+
+      <div class="tab-panel" id="tab-setup" role="tabpanel" hidden>
+        <label class="field">
+          <span>Campaign</span>
+          <select id="setup-campaign">
+            {groups.map((group) => (
+              <optgroup label={group}>
+                {CAMPAIGNS.filter((c) => c.group === group).map((c) => <option value={c.id}>{c.name}</option>)}
+              </optgroup>
+            ))}
+          </select>
+        </label>
+        <div class="field">
+          <span>Difficulty</span>
+          <div class="segmented" id="setup-difficulty">
+            {DIFFICULTIES.map((d) => <button data-difficulty={d} aria-pressed="false">{DIFFICULTY_NAMES[d]}</button>)}
+          </div>
+        </div>
+        <div class="field">
+          <span>Starting bag</span>
+          <div class="preview" id="setup-preview"></div>
+        </div>
+        <button class="ink-btn danger solid wide" data-action="ask-setup">Set up bag</button>
+        <p class="fine">Replaces the current bag. Drawn and sealed tokens go back, and bless and curse tokens are removed.</p>
+      </div>
+    </div>
+  </div>
+</section>
