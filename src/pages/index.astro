@@ -1,129 +1,116 @@
 ---
-import '@fontsource/eb-garamond/500.css';
-import '@fontsource/eb-garamond/600.css';
-import '@fontsource/eb-garamond/500-italic.css';
-import '../styles/app.css';
-import '../styles/bag.css';
-import Stat from '../components/Stat.astro';
-import ChaosBag from '../components/ChaosBag.astro';
-import { tokenSprite } from '../scripts/tokenArt';
+import Layout from '../layouts/Layout.astro';
+import '../styles/start.css';
+import { FACTIONS, FACTION_NAMES, INVESTIGATORS, thumbImage } from '../scripts/investigators';
 
-const icons = {
-  undo: 'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11',
-  redo: 'm15 14 5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13',
-  log: 'M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20M8 7h8M8 11h6',
-  bag: 'M9 3h6l-1.5 3.5h-3zM10.5 6.5C6 8.5 3.5 12.5 4 16.5 4.5 20 7.5 21.5 12 21.5s7.5-1.5 8-5c.5-4-2-8-6.5-10M9.5 13.5h5',
-  fullscreen: 'M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3',
-  close: 'M18 6 6 18M6 6l12 12',
-};
+const sections = [...new Set(INVESTIGATORS.map((i) => i.section))];
+const flip = 'M4 7h13l-3-3M20 17H7l3 3';
+const close = 'M18 6 6 18M6 6l12 12';
+const search = 'M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14zM16 16l5 5';
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
-    <meta name="googlebot" content="noindex, nofollow" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Gator Board" />
-    <meta name="theme-color" content="#1a120b" />
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="/img/icon-180.png" />
-    <link rel="icon" type="image/png" href="/img/icon-180.png" />
-    <link rel="preload" as="image" href="/img/card-2800.webp" imagesrcset="/img/card-1672.webp 1672w, /img/card-2800.webp 2800w" imagesizes="100vw" />
-    <title>Gator Board</title>
-  </head>
-  <body>
-    <Fragment set:html={tokenSprite()} />
-    <div class="backdrop" aria-hidden="true"></div>
+<Layout title="Gator Board" bodyClass="start">
+  <div class="start-wrap">
+    <header class="masthead">
+      <h1>Gator Board</h1>
+      <p>Choose an investigator to begin.</p>
+    </header>
 
-    <main class="stage" id="stage">
-      <img
-        class="card"
-        src="/img/card-2800.webp"
-        srcset="/img/card-1672.webp 1672w, /img/card-2800.webp 2800w"
-        sizes="100vw"
-        width="2800"
-        height="2010"
-        alt=""
-        draggable="false"
-      />
-
-      <section class="stats stats-resource" aria-label="Resources">
-        <Stat stat="r" label="Resources" icon="crate" />
-      </section>
-
-      <section class="stats stats-main" aria-label="Health and sanity">
-        <Stat stat="h" label="Health" icon="heart" />
-        <Stat stat="s" label="Sanity" icon="brain" />
-      </section>
-
-      <nav class="controls" aria-label="Controls">
-        <button class="round" data-action="undo" aria-label="Undo">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.undo} /></svg>
-        </button>
-        <button class="round round-main" data-action="open-log" aria-label="Open campaign log">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.log} /></svg>
-        </button>
-        <button class="round round-main" data-action="open-bag" aria-label="Open chaos bag">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.bag} /></svg>
-        </button>
-        <button class="round" data-action="redo" aria-label="Redo">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.redo} /></svg>
-        </button>
-        <button class="round" data-action="fullscreen" aria-label="Toggle full screen" hidden>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.fullscreen} /></svg>
-        </button>
-      </nav>
-
-      <div class="scrim" data-action="close-log" hidden></div>
-
-      <aside class="log" id="log" aria-label="Campaign log" aria-hidden="true" inert>
-        <header class="log-head">
-          <h1>Campaign Log</h1>
-          <button class="icon-btn" data-action="close-log" aria-label="Close campaign log">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.close} /></svg>
-          </button>
-        </header>
-        <p class="log-summary">
-          Resources <strong data-summary="r"></strong><span class="dot">·</span>Health <strong data-summary="h"></strong><span class="dot">·</span>Sanity <strong data-summary="s"></strong>
-        </p>
-        <div class="log-actions">
-          <button class="ink-btn" data-action="undo">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.undo} /></svg>Undo
-          </button>
-          <button class="ink-btn" data-action="redo">
-            Redo<svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.redo} /></svg>
-          </button>
-        </div>
-        <ol class="log-list" id="log-list"></ol>
-        <footer class="log-foot">
-          <button class="ink-btn danger" data-action="ask-reset">Reset campaign</button>
-        </footer>
-      </aside>
-
-      <ChaosBag />
-
-      <div class="confirm" id="confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-text" hidden>
-        <div class="confirm-card">
-          <h2 id="confirm-title"></h2>
-          <p id="confirm-text"></p>
-          <div class="confirm-actions">
-            <button class="ink-btn" data-action="confirm-cancel">Cancel</button>
-            <button class="ink-btn danger solid" data-action="confirm-ok"></button>
-          </div>
-        </div>
+    <section class="session" id="session" hidden aria-labelledby="session-title">
+      <img class="session-thumb" id="session-thumb" alt="" />
+      <div class="session-info">
+        <p class="eyebrow">Session in progress</p>
+        <h2 id="session-title"></h2>
+        <p class="session-stats" id="session-stats"></p>
+        <p class="session-meta" id="session-meta"></p>
       </div>
-    </main>
+      <div class="session-actions">
+        <a class="btn primary" href="/play/">Continue</a>
+        <p class="hint">Or choose an investigator below to start a new session.</p>
+      </div>
+    </section>
 
-    <div class="rotate" aria-hidden="true">
-      <p>Rotate to landscape</p>
+    <div class="toolbar">
+      <div class="filters" role="group" aria-label="Filter by class">
+        <button class="filter" data-faction="all" aria-pressed="true">All</button>
+        {FACTIONS.map((f) => <button class={`filter f-${f}`} data-faction={f} aria-pressed="false">{FACTION_NAMES[f]}</button>)}
+      </div>
+      <label class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={search} /></svg>
+        <input id="search" type="search" placeholder="Search name or set" autocomplete="off" />
+      </label>
     </div>
 
-    <script>
-      import '../scripts/app';
-    </script>
-  </body>
-</html>
+    <p class="empty" id="empty" hidden>No investigators match.</p>
+
+    {sections.map((section) => (
+      <section class="group" data-section={section}>
+        <h2>{section}</h2>
+        <ul class="grid">
+          {INVESTIGATORS.filter((i) => i.section === section).map((i) => (
+            <li>
+              <button
+                class={`tile f-${i.faction}`}
+                data-code={i.code}
+                data-faction={i.faction}
+                data-search={`${i.name} ${i.subname} ${i.set} ${i.section} ${FACTION_NAMES[i.faction]}`.toLowerCase()}
+              >
+                <img src={thumbImage(i.code)} alt="" loading="lazy" decoding="async" width="560" height="402" />
+                <span class="tile-text">
+                  <span class="tile-name">{i.name}</span>
+                  <span class="tile-sub">{i.subname}</span>
+                  <span class="tile-meta">
+                    <span class="pip health" title="Health">{i.health}</span>
+                    <span class="pip sanity" title="Sanity">{i.sanity}</span>
+                    {i.section !== i.set && <span class="tile-set">{i.set}</span>}
+                  </span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+
+  <div class="sheet-scrim" id="detail" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="detail-name">
+      <button class="close" data-action="close-detail" aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={close} /></svg>
+      </button>
+      <div class="detail-card">
+        <img id="detail-img" alt="" />
+        <button class="btn ghost flip" data-action="flip" id="detail-flip">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d={flip} /></svg><span>Show back</span>
+        </button>
+      </div>
+      <div class="detail-info">
+        <p class="eyebrow" id="detail-faction"></p>
+        <h2 id="detail-name"></h2>
+        <p class="detail-sub" id="detail-sub"></p>
+        <p class="detail-set" id="detail-set"></p>
+        <p class="detail-stats">
+          <span class="pip health" id="detail-health"></span> Health
+          <span class="pip sanity" id="detail-sanity"></span> Sanity
+          <span class="pip resource">5</span> Resources
+        </p>
+        <button class="btn primary wide" data-action="choose">Start playing</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet-scrim" id="confirm" hidden>
+    <div class="confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-text">
+      <h2 id="confirm-title">Start a new session?</h2>
+      <p id="confirm-text"></p>
+      <div class="confirm-actions">
+        <button class="btn ghost" data-action="cancel-new">Keep current session</button>
+        <button class="btn danger" data-action="confirm-new">Start new session</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import '../scripts/start';
+  </script>
+</Layout>

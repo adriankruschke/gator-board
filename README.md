@@ -1,20 +1,31 @@
 # Gator Board
 
-A one-page, landscape, full-screen health and sanity tracker built with Astro. It's tuned for a recent iPad.
+A landscape, full-screen investigator board built with Astro and tuned for a recent iPad.
 
-## Features
+## Pages
 
-- Arrows on each side of the resource, health and sanity icons lower or raise the value (0–99). Defaults are 5 resources, 7 health, 8 sanity.
-- A campaign log (book button, bottom left) with undo and redo. Taps on the same stat within 3 seconds merge into one entry.
-- A chaos bag (bag button, bottom left):
+- **`/` — start page.** Pick from 98 investigators: the Revised Core Set, every campaign and investigator expansion, the 2026 Core Set, starter decks, novellas and promos, parallel investigators, and scenario-only investigators. Filter by class or search by name, set or section. Tap one to see the full card (front and back), then start playing.
+  - If a session is saved you can **Continue** it. Choosing an investigator instead asks for confirmation before the saved session is replaced.
+- **`/play/` — the board.** It opens with the session's investigator card. Visiting it without a session sends you back to `/`.
+
+## Board features
+
+- Resource, health and sanity trackers with arrows (0–99). They start at 5 resources plus the investigator's printed health and sanity. The health / sanity plaque sits over the icons printed on the card.
+- Side buttons: back to the start page, view the card back, full screen.
+- A campaign log (book button) with undo and redo. Taps on the same stat within 3 seconds merge into one entry.
+- A chaos bag (bag button):
   - **Set up:** seed the bag from any campaign and difficulty (data in `src/scripts/tokens.ts`).
   - **Contents:** add or remove any token, including bless and curse (up to the physical token limits). Seal tokens and release them.
   - **Draw:** tap the bag or draw 1–5 at once, then "Draw another" as needed. Tap a drawn token to put just that one back, or return them all. Returning removes drawn bless and curse tokens from the bag unless you choose to keep them.
   - Keyboard: 1–9 draw that many, space draws or returns, 0 / Enter returns.
   - Every draw, return that removes bless/curse, token edit, seal, release and bag setup is written to the campaign log. Undo/redo only applies to resource, health and sanity changes.
-- Reset lives in the campaign log and asks for confirmation first. It restores the defaults (including a Night of the Zealot / Standard bag), clears the log, and deletes the saved cookies.
-- State is saved to first-party cookies (split into chunks) and restored on load.
+- **Reset campaign** (in the log) asks for confirmation, then restarts the same investigator from their defaults with a Night of the Zealot / Standard bag and an empty log.
+- The session is saved to first-party cookies (split into chunks) and restored on load. Older saves without an investigator load as Harvey Walters.
 - Search engines are told not to index the site: `robots` meta tag, `robots.txt`, and an `X-Robots-Tag` header in `public/_headers` (Netlify / Cloudflare Pages).
+
+## Card images
+
+`public/inv/` holds, per investigator code: `<code>.webp` (front, 2800×2010), `<code>-back.webp` (2400 px wide, where available) and `<code>-thumb.webp`. Fronts were upscaled with Real-ESRGAN (two ×4 passes for small scans), rotated to landscape where needed, and aligned so the printed health / sanity icons land in the same place on every card. Investigator data lives in `src/data/investigators.json`.
 
 ## Develop
 

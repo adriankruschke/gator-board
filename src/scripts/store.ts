@@ -5,6 +5,7 @@ import {
   findCampaign, startingBag,
 } from './tokens';
 import type { Bag, Difficulty, Token } from './tokens';
+import { LEGACY_INVESTIGATOR, findInvestigator } from './investigators';
 
 export type Stat = 'r' | 'h' | 's';
 
@@ -44,6 +45,8 @@ export interface ChaosBag {
 }
 
 export interface State {
+  /** Investigator card code; decides the board image and starting health / sanity. */
+  inv: string;
   r: number;
   h: number;
   s: number;
@@ -51,7 +54,13 @@ export interface State {
   log: Entry[];
 }
 
-export const DEFAULTS = { r: 5, h: 7, s: 8 } as const;
+export const STARTING_RESOURCES = 5;
+
+/** Starting resources, health and sanity for an investigator. */
+export function defaultsFor(inv: string): { r: number; h: number; s: number } {
+  const i = findInvestigator(inv);
+  return { r: STARTING_RESOURCES, h: i?.health ?? 7, s: i?.sanity ?? 8 };
+}
 export const MIN = 0;
 export const MAX = 99;
 const MAX_ENTRIES = 500;
@@ -73,7 +82,7 @@ export const initialBag = (campaign = DEFAULT_CAMPAIGN, difficulty: Difficulty =
   sealed: [],
 });
 
-export const initialState = (): State => ({ ...DEFAULTS, bag: initialBag(), log: [] });
+export const initialState = (inv: string): State => ({ inv, ...defaultsFor(inv), bag: initialBag(), log: [] });
 
 const clamp = (n: number) => Math.min(MAX, Math.max(MIN, n));
 const now = () => Math.floor(Date.now() / 1000);
@@ -305,21 +314,24 @@ function validBag(b: any): b is ChaosBag {
 }
 
 function serialize(s: State): string {
-  return encodeURIComponent(JSON.stringify({ v: 3, r: s.r, h: s.h, s: s.s, bag: s.bag, log: s.log }));
+  return encodeURIComponent(JSON.stringify({ v: 4, inv: s.inv, r: s.r, h: s.h, s: s.s, bag: s.bag, log: s.log }));
 }
 
 function deserialize(raw: string): State | null {
   if (raw.startsWith('v1|') || raw.startsWith('v2|')) return deserializeLegacy(raw);
   const data = JSON.parse(decodeURIComponent(raw));
-  if (data?.v !== 3 || ![data.r, data.h, data.s].every(isStatValue)) return null;
+  // v3 predates choosing an investigator.
+  if (data?.v === 3) data.inv = LEGACY_INVESTIGATOR;
+  else if (data?.v !== 4 || !findInvestigator(data.inv)) return null;
+  if (![data.r, data.h, data.s].every(isStatValue)) return null;
   if (!validBag(data.bag) || !Array.isArray(data.log) || !data.log.every(validEntry)) return null;
-  return { r: data.r, h: data.h, s: data.s, bag: data.bag, log: data.log };
+  return { inv: data.inv, r: data.r, h: data.h, s: data.s, bag: data.bag, log: data.log };
 }
 
 /** v1 "v1|h|s|cursor|entries" and v2 "v2|r|h|s|cursor|entries" predate the chaos bag. */
 function deserializeLegacy(raw: string): State | null {
   const parts = raw.split('|');
-  if (parts[0] === 'v1' && parts.length === 5) parts.splice(0, 1, 'v2', String(DEFAULTS.r));
+  if (parts[0] === 'v1' && parts.length === 5) parts.splice(0, 1, 'v2', String(STARTING_RESOURCES));
   if (parts.length !== 6) return null;
   const [r, h, s, cursor] = parts.slice(1, 5).map(Number);
   const log: StatEntry[] = [];
@@ -330,7 +342,7 @@ function deserializeLegacy(raw: string): State | null {
   }
   if (![r, h, s].every(isStatValue) || !isInt(cursor) || cursor < 0 || cursor > log.length) return null;
   log.forEach((e, i) => { if (i >= cursor) e.undone = true; });
-  return { r, h, s, bag: initialBag(), log };
+  return { inv: LEGACY_INVESTIGATOR, r, h, s, bag: initialBag(), log };
 }
 
 // ---- Cookies (chunked, since a single cookie is limited to ~4KB)
@@ -349,21 +361,28 @@ function writeCookie(name: string, value: string, maxAge: number) {
   document.cookie = `${name}=${value}; Max-Age=${maxAge}; Path=/; SameSite=Lax${secure}`;
 }
 
-export function load(): State {
+/** The saved session, or null when there isn't a valid one. */
+export function load(): State | null {
   try {
     const cookies = readCookies();
     const count = Number(cookies.get(`${COOKIE}_n`));
-    if (!Number.isInteger(count) || count < 1 || count > MAX_CHUNKS) return initialState();
+    if (!Number.isInteger(count) || count < 1 || count > MAX_CHUNKS) return null;
     let raw = '';
     for (let i = 0; i < count; i++) {
       const chunk = cookies.get(`${COOKIE}_${i}`);
-      if (chunk === undefined) return initialState();
+      if (chunk === undefined) return null;
       raw += chunk;
     }
-    return deserialize(raw) ?? initialState();
+    return deserialize(raw);
   } catch {
-    return initialState();
+    return null;
   }
+}
+
+/** Replaces any saved session with a fresh one for the investigator. */
+export function startSession(inv: string): State {
+  clear();
+  return save(initialState(inv));
 }
 
 /** Persists the state and returns it (with the oldest history trimmed if it didn't fit). */

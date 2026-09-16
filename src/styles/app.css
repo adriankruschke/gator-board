@@ -60,7 +60,7 @@ svg {
 .backdrop {
   position: fixed;
   inset: -10%;
-  background: url('/img/card-1672.webp') center / cover no-repeat;
+  background: center / cover no-repeat;
   filter: blur(48px) brightness(0.4) saturate(1.1);
 }
 
@@ -93,25 +93,30 @@ svg {
   align-items: center;
 }
 
-.stats-main {
-  left: 57.4%;
-  width: 40.6%;
-  top: 78.6%;
-  height: 14%;
-}
-
-/* Sits over the illustration, just left of the text box, on its own parchment plaque. */
+/*
+ * Both trackers sit on parchment plaques. The health / sanity plaque covers the icons printed on
+ * the card, which every card image is aligned to.
+ */
+.stats-main,
 .stats-resource {
-  left: 33.4%;
-  width: 21%;
-  top: 79.3%;
-  height: 12.6%;
+  top: 79.8%;
+  height: 12.8%;
   border: 0.3cqw solid var(--leather);
   border-radius: 1.2cqw;
   background:
     radial-gradient(120% 90% at 30% 20%, rgb(255 255 255 / 0.4), transparent 60%),
     linear-gradient(180deg, var(--paper), var(--paper-deep));
   box-shadow: 0 0.6cqw 1.8cqw rgb(0 0 0 / 0.55), inset 0 0 0 0.18cqw var(--brass);
+}
+
+.stats-main {
+  left: 60.2%;
+  width: 37.8%;
+}
+
+.stats-resource {
+  left: 37.4%;
+  width: 21%;
 }
 
 .stat {
@@ -266,6 +271,45 @@ svg {
   color: #f3e3bd;
   box-shadow: 0 0.3cqw 0.9cqw rgb(0 0 0 / 0.55), inset 0 0 0 0.12cqw rgb(0 0 0 / 0.5);
   transition: transform 90ms ease, opacity 150ms ease;
+}
+
+.side-controls {
+  position: absolute;
+  left: 1.6cqw;
+  bottom: 9.4cqw;
+  display: flex;
+  flex-direction: column;
+  gap: 1cqw;
+}
+
+a.round {
+  color: #f3e3bd;
+}
+
+.card-back {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1cqw;
+  background: rgb(10 6 3 / 0.88);
+  animation: fade 180ms ease;
+}
+
+.card-back img {
+  max-width: 92cqw;
+  max-height: 88cqh;
+  border-radius: 1.4cqw;
+  box-shadow: 0 1.5cqw 4cqw rgb(0 0 0 / 0.7);
+}
+
+.card-back p {
+  margin: 0;
+  color: #d9c8a2;
+  font-size: 1.6cqw;
+  font-style: italic;
 }
 
 .round-main {

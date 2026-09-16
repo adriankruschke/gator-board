@@ -1,5 +1,5 @@
 import {
-  load, save, clear, initialState, change, undo, redo, canUndo, canRedo, MIN, MAX, DEFAULTS,
+  load, save, startSession, initialState, defaultsFor, change, undo, redo, canUndo, canRedo, MIN, MAX,
   draw, returnAll, returnOne, setCount, seal, release, clearBlessCurse, setupBag,
   total, inBag, outOfBag, bagSize, minCount, maxCount,
 } from './store';
@@ -7,6 +7,7 @@ import type { Entry, State, Stat } from './store';
 import { DIFFICULTY_NAMES, TOKENS, TOKEN_NAMES, findCampaign, startingBag } from './tokens';
 import type { Difficulty, Token } from './tokens';
 import { tokenUse } from './tokenArt';
+import { LEGACY_INVESTIGATOR, backImage, cardImage, findInvestigator, thumbImage } from './investigators';
 
 const STAT_NAMES: Record<Stat, string> = { r: 'Resources', h: 'Health', s: 'Sanity' };
 
@@ -22,7 +23,19 @@ const bagScrim = stage.querySelector<HTMLElement>('.bag-scrim')!;
 const confirmEl = $('confirm');
 const setupCampaign = $<HTMLSelectElement>('setup-campaign');
 
-let state: State = load();
+const saved = load();
+// The board needs a session; without one, pick an investigator first.
+if (!saved) location.replace('/');
+let state: State = saved ?? initialState(LEGACY_INVESTIGATOR);
+const investigator = findInvestigator(state.inv)!;
+const defaults = defaultsFor(state.inv);
+
+document.title = `${investigator.name} · Gator Board`;
+$<HTMLImageElement>('card').src = cardImage(investigator.code);
+$<HTMLImageElement>('card').alt = `${investigator.name}, ${investigator.subname}`;
+// The blurred backdrop only needs the thumbnail; blurring the full-size card is expensive.
+$('backdrop').style.backgroundImage = `url('${thumbImage(investigator.code)}')`;
+stage.querySelector<HTMLElement>('[data-action="show-back"]')!.hidden = !investigator.back;
 let setupDifficulty: Difficulty = state.bag.difficulty;
 let pendingConfirm: (() => void) | null = null;
 
@@ -107,7 +120,7 @@ function renderLog() {
   for (let i = state.log.length - 1; i >= 0; i--) rows.push(entryRow(state.log[i], i === currentIndex));
   rows.push(
     `<li class="entry origin"><span class="entry-stat">Start</span>` +
-      `<span class="entry-change entry-wide">Resources ${DEFAULTS.r} · Health ${DEFAULTS.h} · Sanity ${DEFAULTS.s}</span></li>`,
+      `<span class="entry-change entry-wide">${investigator.name} · Resources ${defaults.r} · Health ${defaults.h} · Sanity ${defaults.s}</span></li>`,
   );
   logList.innerHTML = rows.join('');
 }
@@ -282,14 +295,21 @@ const actions: Record<string, () => void> = {
   },
   'ask-reset': () =>
     askConfirm('Reset the campaign?',
-      `Resources, health and sanity go back to <strong>${DEFAULTS.r}</strong>, <strong>${DEFAULTS.h}</strong> and ` +
-      `<strong>${DEFAULTS.s}</strong>, the chaos bag returns to its default setup, and the entire campaign log is erased. ` +
+      `Resources, health and sanity go back to <strong>${defaults.r}</strong>, <strong>${defaults.h}</strong> and ` +
+      `<strong>${defaults.s}</strong>, the chaos bag returns to its default setup, and the entire campaign log is erased. ` +
       'This can’t be undone.',
       'Reset everything', () => {
-        clear();
-        state = initialState();
+        state = startSession(state.inv);
         render();
       }),
+  'show-back': () => {
+    const img = $<HTMLImageElement>('card-back-img');
+    if (!img.getAttribute('src')) img.src = backImage(investigator.code);
+    $('card-back').hidden = false;
+  },
+  'hide-back': () => {
+    $('card-back').hidden = true;
+  },
   'confirm-cancel': closeConfirm,
   'confirm-ok': () => {
     const run = pendingConfirm;
@@ -329,6 +349,7 @@ confirmEl.addEventListener('click', (ev) => {
 document.addEventListener('keydown', (ev) => {
   if (ev.key === 'Escape') {
     if (!confirmEl.hidden) closeConfirm();
+    else if (!$('card-back').hidden) actions['hide-back']();
     else if (bagOpen()) actions['close-bag']();
     else actions['close-log']();
     return;

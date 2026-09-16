@@ -1,0 +1,116 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/app.css';
+import '../styles/bag.css';
+import Stat from '../components/Stat.astro';
+import ChaosBag from '../components/ChaosBag.astro';
+import { tokenSprite } from '../scripts/tokenArt';
+
+const icons = {
+  undo: 'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11',
+  redo: 'm15 14 5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13',
+  log: 'M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20M8 7h8M8 11h6',
+  bag: 'M9 3h6l-1.5 3.5h-3zM10.5 6.5C6 8.5 3.5 12.5 4 16.5 4.5 20 7.5 21.5 12 21.5s7.5-1.5 8-5c.5-4-2-8-6.5-10M9.5 13.5h5',
+  home: 'M3 11 12 3l9 8M5 9.5V21h5v-6h4v6h5V9.5',
+  flip: 'M4 7h13l-3-3M20 17H7l3 3',
+  fullscreen: 'M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3',
+  close: 'M18 6 6 18M6 6l12 12',
+};
+---
+
+<Layout title="Gator Board">
+  <Fragment set:html={tokenSprite()} />
+  <div class="backdrop" id="backdrop" aria-hidden="true"></div>
+
+  <main class="stage" id="stage">
+    <img class="card" id="card" width="2800" height="2010" alt="" draggable="false" />
+
+    <section class="stats stats-resource" aria-label="Resources">
+      <Stat stat="r" label="Resources" icon="crate" />
+    </section>
+
+    <section class="stats stats-main" aria-label="Health and sanity">
+      <Stat stat="h" label="Health" icon="heart" />
+      <Stat stat="s" label="Sanity" icon="brain" />
+    </section>
+
+    <nav class="side-controls" aria-label="Session">
+      <a class="round" href="/" aria-label="Choose investigator">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.home} /></svg>
+      </a>
+      <button class="round" data-action="show-back" aria-label="View card back" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.flip} /></svg>
+      </button>
+      <button class="round" data-action="fullscreen" aria-label="Toggle full screen" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.fullscreen} /></svg>
+      </button>
+    </nav>
+
+    <nav class="controls" aria-label="Controls">
+      <button class="round" data-action="undo" aria-label="Undo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.undo} /></svg>
+      </button>
+      <button class="round round-main" data-action="open-log" aria-label="Open campaign log">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.log} /></svg>
+      </button>
+      <button class="round round-main" data-action="open-bag" aria-label="Open chaos bag">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.bag} /></svg>
+      </button>
+      <button class="round" data-action="redo" aria-label="Redo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.redo} /></svg>
+      </button>
+    </nav>
+
+    <div class="scrim" data-action="close-log" hidden></div>
+
+    <aside class="log" id="log" aria-label="Campaign log" aria-hidden="true" inert>
+      <header class="log-head">
+        <h1>Campaign Log</h1>
+        <button class="icon-btn" data-action="close-log" aria-label="Close campaign log">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.close} /></svg>
+        </button>
+      </header>
+      <p class="log-summary">
+        Resources <strong data-summary="r"></strong><span class="dot">·</span>Health <strong data-summary="h"></strong><span class="dot">·</span>Sanity <strong data-summary="s"></strong>
+      </p>
+      <div class="log-actions">
+        <button class="ink-btn" data-action="undo">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.undo} /></svg>Undo
+        </button>
+        <button class="ink-btn" data-action="redo">
+          Redo<svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.redo} /></svg>
+        </button>
+      </div>
+      <ol class="log-list" id="log-list"></ol>
+      <footer class="log-foot">
+        <button class="ink-btn danger" data-action="ask-reset">Reset campaign</button>
+      </footer>
+    </aside>
+
+    <ChaosBag />
+
+    <div class="card-back" id="card-back" data-action="hide-back" hidden>
+      <img id="card-back-img" alt="Card back" draggable="false" />
+      <p>Tap anywhere to return to the board</p>
+    </div>
+
+    <div class="confirm" id="confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-text" hidden>
+      <div class="confirm-card">
+        <h2 id="confirm-title"></h2>
+        <p id="confirm-text"></p>
+        <div class="confirm-actions">
+          <button class="ink-btn" data-action="confirm-cancel">Cancel</button>
+          <button class="ink-btn danger solid" data-action="confirm-ok"></button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="rotate" aria-hidden="true">
+    <p>Rotate to landscape</p>
+  </div>
+
+  <script>
+    import '../scripts/app';
+  </script>
+</Layout>
