@@ -7,7 +7,8 @@ import type { Entry, State, Stat } from './store';
 import { DIFFICULTY_NAMES, TOKENS, TOKEN_NAMES, findCampaign, startingBag } from './tokens';
 import type { Difficulty, Token } from './tokens';
 import { tokenUse } from './tokenArt';
-import { LEGACY_INVESTIGATOR, backImage, cardImage, findInvestigator, thumbImage } from './investigators';
+import { BASE, LEGACY_INVESTIGATOR, backImage, cardImage, findInvestigator, thumbImage } from './investigators';
+import { playClick } from './sound';
 
 const STAT_NAMES: Record<Stat, string> = { c: 'Clues', r: 'Resources', h: 'Health', s: 'Sanity' };
 
@@ -25,7 +26,7 @@ const setupCampaign = $<HTMLSelectElement>('setup-campaign');
 
 const saved = load();
 // The board needs a session; without one, pick an investigator first.
-if (!saved) location.replace('/');
+if (!saved) location.replace(BASE);
 let state: State = saved ?? initialState(LEGACY_INVESTIGATOR);
 const investigator = findInvestigator(state.inv)!;
 const defaults = defaultsFor(state.inv);
@@ -328,7 +329,12 @@ stage.addEventListener('click', (ev) => {
   const d = target.dataset;
   const rowToken = () => target.closest<HTMLElement>('.bag-row')!.dataset.token as Token;
 
-  if (d.stat) commit(change(state, d.stat as Stat, Number(d.delta)));
+  if (d.stat) {
+    const delta = Number(d.delta);
+    const before = state[d.stat as Stat];
+    commit(change(state, d.stat as Stat, delta));
+    if (state[d.stat as Stat] !== before) playClick(delta > 0);
+  }
   else if (d.draw) commit(draw(state, Number(d.draw)));
   else if (d.return) commit(returnOne(state, Number(d.return)));
   else if (d.release) commit(release(state, Number(d.release)));

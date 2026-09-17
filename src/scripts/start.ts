@@ -1,6 +1,6 @@
 import { load, startSession } from './store';
 import { DIFFICULTY_NAMES, findCampaign } from './tokens';
-import { FACTION_NAMES, backImage, cardImage, findInvestigator, thumbImage } from './investigators';
+import { BASE, FACTION_NAMES, backImage, cardImage, findInvestigator, thumbImage } from './investigators';
 import type { Investigator } from './investigators';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -88,7 +88,7 @@ function closeDetail() {
 
 function begin(inv: Investigator) {
   startSession(inv.code);
-  location.href = '/play/';
+  location.href = `${BASE}play/`;
 }
 
 function choose() {

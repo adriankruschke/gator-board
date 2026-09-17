@@ -419,6 +419,26 @@ svg {
   font-size: 0.85rem;
 }
 
+.disclaimer {
+  max-width: 760px;
+  margin: 56px auto 0;
+  padding-top: 18px;
+  border-top: 1px solid rgb(201 164 92 / 0.25);
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.disclaimer p {
+  margin: 0 0 6px;
+}
+
+.disclaimer strong {
+  color: #d8c49a;
+  font-weight: 600;
+}
+
 .empty {
   margin: 48px 0;
   text-align: center;

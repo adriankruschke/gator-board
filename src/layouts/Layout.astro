@@ -9,6 +9,7 @@ interface Props {
 }
 
 const { title = 'Gator Board', bodyClass } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 ---
 
 <html lang="en">
@@ -22,9 +23,9 @@ const { title = 'Gator Board', bodyClass } = Astro.props;
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Gator Board" />
     <meta name="theme-color" content="#1a120b" />
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="/img/icon-180.png" />
-    <link rel="icon" type="image/png" href="/img/icon-180.png" />
+    <link rel="manifest" href={`${base}manifest.webmanifest`} />
+    <link rel="apple-touch-icon" href={`${base}img/icon-180.png`} />
+    <link rel="icon" type="image/png" href={`${base}img/icon-180.png`} />
     <slot name="head" />
     <title>{title}</title>
   </head>

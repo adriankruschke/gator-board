@@ -4,6 +4,7 @@ import '../styles/app.css';
 import '../styles/bag.css';
 import Stat from '../components/Stat.astro';
 import ChaosBag from '../components/ChaosBag.astro';
+import Disclaimer from '../components/Disclaimer.astro';
 import { tokenSprite } from '../scripts/tokenArt';
 
 const icons = {
@@ -39,7 +40,7 @@ const icons = {
     </section>
 
     <nav class="controls" aria-label="Controls">
-      <a class="round" href="/" aria-label="Choose investigator">
+      <a class="round" href={import.meta.env.BASE_URL} aria-label="Choose investigator">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.home} /></svg>
       </a>
       <button class="round" data-action="show-back" aria-label="View card back" hidden>
@@ -62,6 +63,8 @@ const icons = {
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.bag} /></svg>
       </button>
     </nav>
+
+    <Disclaimer variant="board" />
 
     <div class="scrim" data-action="close-log" hidden></div>
 

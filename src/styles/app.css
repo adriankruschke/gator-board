@@ -273,6 +273,22 @@ svg {
   opacity: 0.2;
 }
 
+/* Bottom-left of the card, clear of the printed illustrator and copyright line. */
+.disclaimer-board {
+  position: absolute;
+  left: 8.6cqw;
+  bottom: 0.5cqw;
+  max-width: 32cqw;
+  margin: 0;
+  color: rgb(243 227 189 / 0.5);
+  font-size: 1cqw;
+  font-style: italic;
+  line-height: 1.25;
+  text-align: left;
+  text-shadow: 0 0.1cqw 0.2cqw rgb(0 0 0 / 0.8);
+  pointer-events: none;
+}
+
 /* ---------- Floating controls ---------- */
 
 /* One column down the left edge so the trackers can use the bottom of the card. */

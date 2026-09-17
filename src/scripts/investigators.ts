@@ -30,6 +30,9 @@ export const FACTION_NAMES: Record<Faction, string> = {
 
 export const findInvestigator = (code: string) => INVESTIGATORS.find((i) => i.code === code);
 
-export const cardImage = (code: string) => `/inv/${code}.webp`;
-export const thumbImage = (code: string) => `/inv/${code}-thumb.webp`;
-export const backImage = (code: string) => `/inv/${code}-back.webp`;
+/** Site root, which is a subdirectory on GitHub Pages. Always ends with "/". */
+export const BASE = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+
+export const cardImage = (code: string) => `${BASE}inv/${code}.webp`;
+export const thumbImage = (code: string) => `${BASE}inv/${code}-thumb.webp`;
+export const backImage = (code: string) => `${BASE}inv/${code}-back.webp`;

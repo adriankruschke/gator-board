@@ -2,6 +2,13 @@
 
 A landscape, full-screen investigator board built with Astro and tuned for a recent iPad.
 
+Live at **https://adriankruschke.github.io/gator-board/** — published by the workflow in
+`.github/workflows/deploy.yml` on every push to `main`.
+
+> Unofficial fan-made project. Not affiliated with, endorsed or sponsored by Fantasy Flight Games.
+> All card images, card text, icons and related intellectual property are © Fantasy Flight Publishing, Inc.
+> All rights reserved. This is a private, not-for-profit site made for personal use at the table.
+
 ## Pages
 
 - **`/` — start page.** Pick from 98 investigators: the Revised Core Set, every campaign and investigator expansion, the 2026 Core Set, starter decks, novellas and promos, parallel investigators, and scenario-only investigators. Filter by class or search by name, set or section. Tap one to see the full card (front and back), then start playing.
@@ -21,7 +28,11 @@ A landscape, full-screen investigator board built with Astro and tuned for a rec
   - Every draw, return that removes bless/curse, token edit, seal, release and bag setup is written to the campaign log. Undo/redo only applies to resource, health and sanity changes.
 - **Reset campaign** (in the log) asks for confirmation, then restarts the same investigator from their defaults with a Night of the Zealot / Standard bag and an empty log.
 - The session is saved to first-party cookies (split into chunks) and restored on load. Older saves without an investigator load as Harvey Walters.
-- Search engines are told not to index the site: `robots` meta tag, `robots.txt`, and an `X-Robots-Tag` header in `public/_headers` (Netlify / Cloudflare Pages).
+- Tapping a tracker arrow plays a short synthesized click (Web Audio, no audio file). It is silent when the value is already at its limit.
+- Every page carries the legal disclaimer above: a footer on the start page, one line in the corner of the board.
+- Search engines are told not to index the site: `robots` meta tag on both pages, `robots.txt`, and an `X-Robots-Tag` header in `public/_headers`.
+  - The meta tag is what counts on GitHub Pages. Pages serves no custom headers, so `_headers` is ignored, and crawlers only read `robots.txt` from the domain root (`adriankruschke.github.io/robots.txt`), not from this project's subdirectory.
+  - A published Pages site is reachable by anyone who has the URL; noindex only keeps it out of search results.
 
 ## Card images
 
@@ -34,7 +45,9 @@ npm install
 npm run dev
 ```
 
-`npm run build` writes the static site to `dist/`.
+`npm run build` writes the static site to `dist/`. The site is served from a subdirectory
+(`base: '/gator-board'` in `astro.config.mjs`), so the dev server and preview also run at
+`http://localhost:4321/gator-board/`. Build paths in code come from `import.meta.env.BASE_URL`.
 
 ## iPad tips
 

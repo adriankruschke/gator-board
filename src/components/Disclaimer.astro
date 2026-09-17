@@ -1,0 +1,24 @@
+---
+interface Props {
+  /** "page" is a full footer; "board" is the single line tucked into the corner of the board. */
+  variant?: 'page' | 'board';
+}
+
+const { variant = 'page' } = Astro.props;
+
+const short = 'Unofficial fan-made project. Not affiliated with, endorsed or sponsored by Fantasy Flight Games.';
+const rights =
+  'All card images, card text, icons and related intellectual property are © Fantasy Flight Publishing, Inc. ' +
+  'All rights reserved.';
+const purpose = 'This is a private, not-for-profit site made for personal use at the table. No content is sold or licensed.';
+---
+
+{variant === 'board' ? (
+  <p class="disclaimer-board">{short} {rights}</p>
+) : (
+  <footer class="disclaimer">
+    <p><strong>{short}</strong></p>
+    <p>{rights}</p>
+    <p>{purpose}</p>
+  </footer>
+)}
