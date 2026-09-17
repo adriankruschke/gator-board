@@ -32,7 +32,6 @@ Live at **https://adriankruschke.github.io/gator-board/** — published by the w
 - The session is saved to first-party cookies (split into chunks) and restored on load. Older saves without an investigator load as Harvey Walters.
 - Tapping a tracker arrow plays a short synthesized click (Web Audio, no audio file). It is silent when the value is already at its limit.
 - Pulling a chaos token has its own sound (a cloth rustle and a soft thud) and animation: the token tumbles in and settles in about 0.8s. It plays only on a pull, not when returning tokens or editing the bag.
-- Pulling the elder sign plays `public/snd/elder-sign.wav`, a rising 8-bit power-up. It is `sfx_sounds_powerup2` from Juhani Junkala's "512 Sound Effects (8-bit style)", which is CC0 (public domain), so it is ours to host and ship.
 - Pulling the auto-fail plays `public/snd/losing-horn.mp3` (the Price is Right losing horn) instead of the usual pull sound. The file came from orangefreesounds.com, which states "private use only"; the underlying sound belongs to the show's owners. It is not ours to license, so treat it as placeholder audio.
 - Every page carries the legal disclaimer above: a footer on the start page, one line in the corner of the board.
 - Search engines are told not to index the site: `robots` meta tag on both pages, `robots.txt`, and an `X-Robots-Tag` header in `public/_headers`.

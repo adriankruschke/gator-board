@@ -35,9 +35,6 @@ function playSample(file: string) {
 /** The losing horn, for drawing the auto-fail token. */
 export const playHorn = () => playSample('losing-horn.mp3');
 
-/** A rising power-up, for drawing the elder sign. */
-export const playElderSign = () => playSample('elder-sign.wav');
-
 let noise: AudioBuffer | null = null;
 
 function noiseBuffer(audio: AudioContext): AudioBuffer {
