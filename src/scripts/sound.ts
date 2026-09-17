@@ -1,4 +1,6 @@
-// A short synthesized click for the tracker arrows. No audio file, so nothing to load.
+// Sounds for the trackers and the chaos bag.
+
+import { BASE } from './investigators';
 
 type Ctor = typeof AudioContext;
 const AudioCtx: Ctor | undefined =
@@ -12,6 +14,19 @@ function context(): AudioContext | null {
   ctx ??= new AudioCtx();
   if (ctx.state === 'suspended') void ctx.resume();
   return ctx;
+}
+
+let horn: HTMLAudioElement | null = null;
+
+/** The losing horn, for drawing the auto-fail token. */
+export function playHorn() {
+  try {
+    horn ??= new Audio(`${BASE}snd/losing-horn.mp3`);
+    horn.currentTime = 0;
+    void horn.play();
+  } catch {
+    // Audio is a nicety; never let it break a tap.
+  }
 }
 
 let noise: AudioBuffer | null = null;

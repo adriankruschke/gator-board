@@ -8,7 +8,7 @@ import { DIFFICULTY_NAMES, TOKENS, TOKEN_NAMES, findCampaign, startingBag } from
 import type { Difficulty, Token } from './tokens';
 import { tokenUse } from './tokenArt';
 import { BASE, LEGACY_INVESTIGATOR, backImage, cardImage, findInvestigator, thumbImage } from './investigators';
-import { playClick, playDraw } from './sound';
+import { playClick, playDraw, playHorn } from './sound';
 
 const STAT_NAMES: Record<Stat, string> = { c: 'Clues', r: 'Resources', h: 'Health', s: 'Sanity' };
 
@@ -268,8 +268,11 @@ function pullTokens(count: number) {
   const before = state.bag.drawn.length;
   drewTokens = true;
   commit(draw(state, count));
-  if (state.bag.drawn.length > before) playDraw();
-  else drewTokens = false;
+  const pulled = state.bag.drawn.slice(before);
+  if (!pulled.length) drewTokens = false;
+  // The auto-fail gets the losing horn instead of the usual pull sound.
+  else if (pulled.includes('auto_fail')) playHorn();
+  else playDraw();
 }
 
 const actions: Record<string, () => void> = {
