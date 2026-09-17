@@ -36,6 +36,9 @@ Live at **https://adriankruschke.github.io/gator-board/** — published by the w
 
 ## Card images
 
+The four tracker icons in `public/img/` are the game's own token art (damage, horror, resource and
+clue tokens), upscaled with Real-ESRGAN.
+
 `public/inv/` holds, per investigator code: `<code>.webp` (front, 2800×2010), `<code>-back.webp` (2400 px wide, where available) and `<code>-thumb.webp`. Fronts were upscaled with Real-ESRGAN (two ×4 passes for small scans), rotated to landscape where needed, and aligned so the printed health / sanity icons land in the same place on every card. Investigator data lives in `src/data/investigators.json`.
 
 ## Develop

@@ -146,11 +146,11 @@ svg {
 }
 
 .stat-heart .icon img {
-  width: 6.6cqw;
+  width: 5.7cqw;
 }
 
 .stat-brain .icon img {
-  width: 9.1cqw;
+  width: 8.6cqw;
 }
 
 .stat-crate .icon img {
@@ -184,11 +184,7 @@ svg {
 }
 
 .stat-heart .value span {
-  translate: 0.1cqw 0.25cqw;
-}
-
-.stat-brain .value {
-  padding-bottom: 0.5cqw;
+  translate: 0 0.35cqw;
 }
 
 .stat-brain .value span {
