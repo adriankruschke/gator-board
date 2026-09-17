@@ -8,7 +8,7 @@ import { DIFFICULTY_NAMES, TOKENS, TOKEN_NAMES, findCampaign, startingBag } from
 import type { Difficulty, Token } from './tokens';
 import { tokenUse } from './tokenArt';
 import { BASE, LEGACY_INVESTIGATOR, backImage, cardImage, findInvestigator, thumbImage } from './investigators';
-import { playClick } from './sound';
+import { playClick, playDraw } from './sound';
 
 const STAT_NAMES: Record<Stat, string> = { c: 'Clues', r: 'Resources', h: 'Health', s: 'Sanity' };
 
@@ -39,6 +39,8 @@ $('backdrop').style.backgroundImage = `url('${thumbImage(investigator.code)}')`;
 stage.querySelector<HTMLElement>('[data-action="show-back"]')!.hidden = !investigator.back;
 let setupDifficulty: Difficulty = state.bag.difficulty;
 let pendingConfirm: (() => void) | null = null;
+/** Set for the render right after a pull, so the token animates in only then. */
+let drewTokens = false;
 
 const timeFmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
 const dayFmt = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
@@ -141,10 +143,12 @@ function renderBag() {
   if (drawn.length) {
     big.innerHTML = tokenUse(drawn[latest], 'token');
     big.classList.remove('empty');
+    big.classList.toggle('drew', drewTokens);
     big.setAttribute('aria-label', drawn.length === 1 ? 'Return tokens' : `Return ${TOKEN_NAMES[drawn[latest]]}`);
   } else {
     big.innerHTML = `<span class="tap">${size ? 'Tap to draw' : 'Bag is empty'}</span>`;
     big.classList.add('empty');
+    big.classList.remove('drew');
     big.setAttribute('aria-label', 'Draw a token');
   }
   big.disabled = !drawn.length && !size;
@@ -180,6 +184,7 @@ function renderBag() {
   stage.querySelector<HTMLElement>('[data-action="clear-blurse"]')!.hidden = bag.bless + bag.curse === 0;
 
   renderSetup();
+  drewTokens = false;
 }
 
 function renderSetup() {
@@ -259,6 +264,14 @@ function toggleFullscreen() {
 
 // ---- Actions
 
+function pullTokens(count: number) {
+  const before = state.bag.drawn.length;
+  drewTokens = true;
+  commit(draw(state, count));
+  if (state.bag.drawn.length > before) playDraw();
+  else drewTokens = false;
+}
+
 const actions: Record<string, () => void> = {
   undo: () => commit(undo(state)),
   redo: () => commit(redo(state)),
@@ -272,11 +285,11 @@ const actions: Record<string, () => void> = {
   // With one token out, tapping it ends the pull; with several, it returns just that token.
   'big-token': () => {
     const { drawn } = state.bag;
-    if (!drawn.length) commit(draw(state, 1));
+    if (!drawn.length) pullTokens(1);
     else if (drawn.length === 1) commit(returnAll(state, false));
     else commit(returnOne(state, drawn.length - 1));
   },
-  'space-draw': () => commit(state.bag.drawn.length ? returnAll(state, false) : draw(state, 1)),
+  'space-draw': () => (state.bag.drawn.length ? commit(returnAll(state, false)) : pullTokens(1)),
   'return-all': () => commit(returnAll(state, false)),
   'return-keep': () => commit(returnAll(state, true)),
   'release-all': () => commit(release(state)),
@@ -335,7 +348,7 @@ stage.addEventListener('click', (ev) => {
     commit(change(state, d.stat as Stat, delta));
     if (state[d.stat as Stat] !== before) playClick(delta > 0);
   }
-  else if (d.draw) commit(draw(state, Number(d.draw)));
+  else if (d.draw) pullTokens(Number(d.draw));
   else if (d.return) commit(returnOne(state, Number(d.return)));
   else if (d.release) commit(release(state, Number(d.release)));
   else if (d.count) commit(setCount(state, rowToken(), total(state.bag, rowToken()) + Number(d.count)));
@@ -372,7 +385,7 @@ document.addEventListener('keydown', (ev) => {
     actions.redo();
   } else if (bagOpen() && !mod) {
     // Keyboard: 1–9 draw that many, space draws or returns everything, 0 / enter return everything.
-    if (/^[1-9]$/.test(ev.key)) commit(draw(state, Number(ev.key)));
+    if (/^[1-9]$/.test(ev.key)) pullTokens(Number(ev.key));
     else if (ev.key === ' ') actions['space-draw']();
     else if (ev.key === '0' || ev.key === 'Enter') actions['return-all']();
     else return;

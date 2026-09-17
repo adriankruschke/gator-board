@@ -99,7 +99,8 @@ svg {
  */
 .stats-main,
 .stats-resource,
-.stats-clue {
+.stats-clue,
+.stats-bag {
   top: 79.8%;
   height: 12.8%;
   border: 0.3cqw solid var(--leather);
@@ -116,13 +117,40 @@ svg {
 }
 
 .stats-resource {
-  left: 38.2%;
-  width: 21%;
+  left: 39.4%;
+  width: 20.4%;
 }
 
 .stats-clue {
-  left: 16.2%;
-  width: 21%;
+  left: 18.2%;
+  width: 20.4%;
+}
+
+/* Opens the chaos bag; sized to match a counter icon so the row reads as one strip. */
+.stats-bag {
+  left: 8.4%;
+  width: 8.8%;
+}
+
+.bag-open {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  transition: transform 90ms ease;
+}
+
+.bag-open img {
+  display: block;
+  width: 7.6cqw;
+  filter: drop-shadow(0 0.15cqw 0.25cqw rgb(60 35 15 / 0.3));
+}
+
+.bag-open:active {
+  transform: scale(0.92);
 }
 
 .stat {

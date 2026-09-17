@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="600" height="600">
+  <defs>
+    <radialGradient id="tok" cx="42%" cy="36%" r="66%">
+      <stop offset="0%" stop-color="#fbf3dd"/><stop offset="70%" stop-color="#e6d8b6"/><stop offset="100%" stop-color="#c3b08a"/>
+    </radialGradient>
+    <radialGradient id="cloth" cx="36%" cy="24%" r="80%">
+      <stop offset="0%" stop-color="#5b4531"/><stop offset="55%" stop-color="#38281a"/><stop offset="100%" stop-color="#1b1208"/>
+    </radialGradient>
+  </defs>
+
+  <circle cx="50" cy="50" r="48" fill="url(#tok)" stroke="#3d2b18" stroke-width="2.6"/>
+  <circle cx="50" cy="50" r="43.5" fill="none" stroke="#3d2b18" stroke-width="0.9" opacity="0.4"/>
+
+  <!-- a token peeking out of the mouth of the bag -->
+  <circle cx="50" cy="35" r="7.5" fill="#efe4c8" stroke="#3d2b18" stroke-width="1.6"/>
+
+  <!-- drawstrings -->
+  <path fill="none" stroke="#3d2b18" stroke-width="2.2" stroke-linecap="round"
+    d="M35 45c-5-1-9-4-9-8M65 45c5-1 9-4 9-8"/>
+
+  <!-- body -->
+  <path fill="url(#cloth)" stroke="#1b1208" stroke-width="1.8"
+    d="M37 44c-7 6-12 14-12 23 0 10 11 16 25 16s25-6 25-16c0-9-5-17-12-23z"/>
+
+  <!-- gathered neck -->
+  <path fill="#4a3626" stroke="#1b1208" stroke-width="1.8"
+    d="M36 41h28c1.6 0 2.6 1.2 2.4 2.8l-.5 4c-.2 1.4-1.3 2.4-2.7 2.4H36.8c-1.4 0-2.5-1-2.7-2.4l-.5-4C33.4 42.2 34.4 41 36 41z"/>
+  <path fill="none" stroke="#2a1d10" stroke-width="1.2" opacity="0.8"
+    d="M41 41.5v8M50 41.5v8M59 41.5v8"/>
+
+  <!-- folds and highlight -->
+  <path fill="none" stroke="#6b5238" stroke-width="1.6" stroke-linecap="round" opacity="0.55"
+    d="M42 54c-3 6-4 12-3 18M58 54c3 6 4 12 3 18M50 55v20"/>
+  <path fill="#d8c49a" opacity="0.4"
+    d="M39 50c-5 5-8 11-8 17 0 4 1 7 4 10-6-3-9-9-9-15 0-5 4-10 9-14z"/>
+</svg>

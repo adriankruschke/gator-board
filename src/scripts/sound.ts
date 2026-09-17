@@ -14,6 +14,60 @@ function context(): AudioContext | null {
   return ctx;
 }
 
+let noise: AudioBuffer | null = null;
+
+function noiseBuffer(audio: AudioContext): AudioBuffer {
+  if (!noise) {
+    noise = audio.createBuffer(1, audio.sampleRate * 0.4, audio.sampleRate);
+    const data = noise.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  }
+  return noise;
+}
+
+/**
+ * Pulling a token: a short rustle of cloth with a soft thud, so it is obvious which action
+ * made the sound.
+ */
+export function playDraw() {
+  try {
+    const audio = context();
+    if (!audio) return;
+    const t = audio.currentTime;
+
+    // Rustle: filtered noise sweeping downwards.
+    const src = audio.createBufferSource();
+    src.buffer = noiseBuffer(audio);
+    const band = audio.createBiquadFilter();
+    band.type = 'bandpass';
+    band.Q.value = 0.9;
+    band.frequency.setValueAtTime(2600, t);
+    band.frequency.exponentialRampToValueAtTime(700, t + 0.26);
+    const rustle = audio.createGain();
+    rustle.gain.setValueAtTime(0.0001, t);
+    rustle.gain.exponentialRampToValueAtTime(0.13, t + 0.05);
+    rustle.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+    src.connect(band).connect(rustle).connect(audio.destination);
+    src.start(t);
+    src.stop(t + 0.32);
+
+    // Thud: the token landing.
+    const thud = audio.createOscillator();
+    thud.type = 'sine';
+    thud.frequency.setValueAtTime(190, t + 0.12);
+    thud.frequency.exponentialRampToValueAtTime(85, t + 0.3);
+    const thudGain = audio.createGain();
+    thudGain.gain.setValueAtTime(0.0001, t + 0.12);
+    thudGain.gain.exponentialRampToValueAtTime(0.2, t + 0.16);
+    thudGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
+    thud.connect(thudGain).connect(audio.destination);
+    thud.start(t + 0.12);
+    thud.stop(t + 0.36);
+  } catch {
+    // Audio is a nicety; never let it break a tap.
+  }
+}
+
 /** `up` raises the pitch slightly so increases and decreases sound different. */
 export function playClick(up: boolean) {
   try {

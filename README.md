@@ -18,7 +18,8 @@ Live at **https://adriankruschke.github.io/gator-board/** — published by the w
 ## Board features
 
 - Clue, resource, health and sanity trackers with arrows (0–99). They start at 0 clues and 5 resources plus the investigator's printed health and sanity. The health / sanity plaque sits over the icons printed on the card.
-- A button column down the left edge: back to the start page, view the card back, full screen, undo, redo, campaign log and chaos bag.
+- A button column down the left edge: back to the start page, view the card back, full screen, undo, redo and the campaign log.
+- The chaos bag opens from a pouch icon sitting on the counter row, sized to match the counter icons. The game has no flat chaos bag symbol, so this icon is drawn to match the token art (`public/img/bag.svg`).
 - A campaign log (book button) with undo and redo. Taps on the same stat within 3 seconds merge into one entry.
 - A chaos bag (bag button):
   - **Set up:** seed the bag from any campaign and difficulty (data in `src/scripts/tokens.ts`).
@@ -29,6 +30,7 @@ Live at **https://adriankruschke.github.io/gator-board/** — published by the w
 - **Reset campaign** (in the log) asks for confirmation, then restarts the same investigator from their defaults with a Night of the Zealot / Standard bag and an empty log.
 - The session is saved to first-party cookies (split into chunks) and restored on load. Older saves without an investigator load as Harvey Walters.
 - Tapping a tracker arrow plays a short synthesized click (Web Audio, no audio file). It is silent when the value is already at its limit.
+- Pulling a chaos token has its own sound (a cloth rustle and a soft thud) and animation: the token tumbles in and settles in about 0.8s. It plays only on a pull, not when returning tokens or editing the bag.
 - Every page carries the legal disclaimer above: a footer on the start page, one line in the corner of the board.
 - Search engines are told not to index the site: `robots` meta tag on both pages, `robots.txt`, and an `X-Robots-Tag` header in `public/_headers`.
   - The meta tag is what counts on GitHub Pages. Pages serves no custom headers, so `_headers` is ignored, and crawlers only read `robots.txt` from the domain root (`adriankruschke.github.io/robots.txt`), not from this project's subdirectory.
