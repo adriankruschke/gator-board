@@ -23,12 +23,8 @@ export const TOKEN_NAMES: Record<Token, string> = {
   bless: 'Bless', curse: 'Curse',
 };
 
-/** How many of each token physically exist, which caps editing. */
-export const TOKEN_LIMITS: Record<Token, number> = {
-  '+1': 3, '0': 4, '-1': 5, '-2': 4, '-3': 3, '-4': 2, '-5': 2, '-6': 2, '-7': 1, '-8': 1,
-  skull: 4, cultist: 4, tablet: 4, elder_thing: 4, auto_fail: 2, elder_sign: 2,
-  frost: 8, blood: 12, bless: 10, curse: 10,
-};
+/** Upper bound for a token count; the game's physical counts are not enforced. */
+export const MAX_TOKEN_COUNT = 99;
 
 export type Bag = Partial<Record<Token, number>>;
 

@@ -53,6 +53,7 @@ const lock = 'M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z';
       </div>
 
       <div class="tab-panel" id="tab-contents" role="tabpanel">
+        <button class="ink-btn subtle wide" data-action="view-tokens">View all tokens in the bag</button>
         <ul class="bag-rows">
           {TOKENS.map((token) => (
             <li class="bag-row" data-token={token}>
@@ -99,3 +100,9 @@ const lock = 'M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z';
     </div>
   </div>
 </section>
+
+<div class="token-view" id="token-view" data-action="close-tokens" aria-hidden="true" hidden>
+  <h2 id="token-view-title"></h2>
+  <div class="token-view-grid" id="token-view-grid"></div>
+  <p>Tap anywhere to close</p>
+</div>

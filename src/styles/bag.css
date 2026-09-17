@@ -525,3 +525,52 @@
     opacity: 0;
   }
 }
+
+/* ---------- Every token in the bag ---------- */
+
+.token-view {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1cqw;
+  padding: 2cqw;
+  background: rgb(10 6 3 / 0.97);
+  animation: fade 160ms ease;
+}
+
+.token-view h2,
+.token-view p {
+  margin: 0;
+  color: #f3e3bd;
+}
+
+.token-view h2 {
+  font-size: 2.4cqw;
+  font-weight: 600;
+}
+
+.token-view p {
+  color: #d9c8a2;
+  font-size: 1.5cqw;
+  font-style: italic;
+}
+
+/* Fills a column top to bottom, then starts another one. */
+.token-view-grid {
+  display: flex;
+  flex-flow: column wrap;
+  align-content: center;
+  justify-content: flex-start;
+  gap: 0.7cqw 1.4cqw;
+  max-height: 74cqh;
+  max-width: 100%;
+  overflow: auto;
+}
+
+.token-view-grid .token {
+  width: 6.4cqw;
+  flex: none;
+}

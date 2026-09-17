@@ -23,7 +23,8 @@ Live at **https://adriankruschke.github.io/gator-board/** — published by the w
 - A campaign log (book button) with undo and redo. Taps on the same stat within 3 seconds merge into one entry.
 - The chaos bag panel:
   - **Set up:** seed the bag from any campaign and difficulty (data in `src/scripts/tokens.ts`).
-  - **Contents:** add or remove any token, including bless and curse (up to the physical token limits). Seal tokens and release them.
+  - **Contents:** add or remove any token, including bless and curse, with no limit on how many of each (up to 99). Seal tokens and release them.
+  - **View all tokens in the bag:** a button in Contents shows every token currently in the bag, filling columns top to bottom.
   - **Draw:** tap the bag or draw 1–5 at once, then "Draw another" as needed. Tap a drawn token to put just that one back, or return them all. Returning removes drawn bless and curse tokens from the bag unless you choose to keep them.
   - Keyboard: 1–9 draw that many, space draws or returns, 0 / Enter returns.
   - Every draw, return that removes bless/curse, token edit, seal, release and bag setup is written to the campaign log. Undo/redo only applies to resource, health and sanity changes.
@@ -43,7 +44,17 @@ The four tracker icons in `public/img/` are the game's own token art (damage, ho
 clue tokens), upscaled with Real-ESRGAN. `public/tok/` holds the game's art for all 20 chaos
 tokens, used everywhere tokens appear (the bag, the log and the setup preview).
 
-`public/inv/` holds, per investigator code: `<code>.webp` (front, 2800×2010), `<code>-back.webp` (2400 px wide, where available) and `<code>-thumb.webp`. Fronts were upscaled with Real-ESRGAN (two ×4 passes for small scans), rotated to landscape where needed, and aligned so the printed health / sanity icons land in the same place on every card. Investigator data lives in `src/data/investigators.json`.
+`public/inv/` holds, per investigator code: `<code>.webp` (front, 2800×2010), `<code>-back.webp` (2400 px wide, where available) and `<code>-thumb.webp`.
+
+93 of the 98 cards come from the Tabletop Simulator mod's card sheets, which hold each card at roughly
+1050×750 — far more detail than the 418×300 scans on ArkhamDB, so small print (illustrator line,
+copyright line, card text) stays legible at iPad resolution. Each card is cut from its sheet cell,
+oriented to landscape, upscaled ×4 with Real-ESRGAN, then aligned to one reference layout so the
+printed health / sanity icons land in the same place on every card. The other five (the four
+Disappearance at the Twilight Estate investigators and Shattered Self) are not in the mod and still
+come from the lower-resolution ArkhamDB scans.
+
+Investigator data lives in `src/data/investigators.json`.
 
 ## Develop
 

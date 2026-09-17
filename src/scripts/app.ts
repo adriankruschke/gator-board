@@ -320,6 +320,16 @@ const actions: Record<string, () => void> = {
         state = startSession(state.inv);
         render();
       }),
+  'view-tokens': () => {
+    const { bag } = state;
+    const tokens = TOKENS.flatMap((t) => Array<Token>(inBag(bag, t)).fill(t));
+    $('token-view-title').textContent = `${plural(tokens.length, 'token')} in the bag`;
+    $('token-view-grid').innerHTML = tokens.map((t) => tokenUse(t)).join('');
+    $('token-view').hidden = false;
+  },
+  'close-tokens': () => {
+    $('token-view').hidden = true;
+  },
   'show-back': () => {
     const img = $<HTMLImageElement>('card-back-img');
     if (!img.getAttribute('src')) img.src = backImage(investigator.code);
@@ -372,6 +382,7 @@ confirmEl.addEventListener('click', (ev) => {
 document.addEventListener('keydown', (ev) => {
   if (ev.key === 'Escape') {
     if (!confirmEl.hidden) closeConfirm();
+    else if (!$('token-view').hidden) actions['close-tokens']();
     else if (!$('card-back').hidden) actions['hide-back']();
     else if (bagOpen()) actions['close-bag']();
     else actions['close-log']();

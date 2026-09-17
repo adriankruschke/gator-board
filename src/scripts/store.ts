@@ -1,7 +1,7 @@
 // Tracker state, chaos bag, campaign log (undo/redo) and cookie persistence.
 
 import {
-  BAG_TOKENS, DEFAULT_CAMPAIGN, DEFAULT_DIFFICULTY, DIFFICULTIES, TOKENS, TOKEN_LIMITS,
+  BAG_TOKENS, DEFAULT_CAMPAIGN, DEFAULT_DIFFICULTY, DIFFICULTIES, MAX_TOKEN_COUNT, TOKENS,
   findCampaign, startingBag,
 } from './tokens';
 import type { Bag, Difficulty, Token } from './tokens';
@@ -220,7 +220,7 @@ export function returnOne(state: State, index: number): State {
 }
 
 export const minCount = outOfBag;
-export const maxCount = (token: Token) => TOKEN_LIMITS[token];
+export const maxCount = (_token: Token) => MAX_TOKEN_COUNT;
 
 export function setCount(state: State, token: Token, value: number): State {
   const { bag } = state;
