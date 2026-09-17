@@ -21,7 +21,7 @@ Live at **https://adriankruschke.github.io/gator-board/** — published by the w
 - A button column down the left edge: back to the start page, view the card back, full screen, undo, redo and the campaign log.
 - The chaos bag opens from a pouch icon sitting on the counter row, sized to match the counter icons. The game has no flat chaos bag symbol, so this icon is drawn to match the token art (`public/img/bag.svg`).
 - A campaign log (book button) with undo and redo. Taps on the same stat within 3 seconds merge into one entry.
-- A chaos bag (bag button):
+- The chaos bag panel:
   - **Set up:** seed the bag from any campaign and difficulty (data in `src/scripts/tokens.ts`).
   - **Contents:** add or remove any token, including bless and curse (up to the physical token limits). Seal tokens and release them.
   - **Draw:** tap the bag or draw 1–5 at once, then "Draw another" as needed. Tap a drawn token to put just that one back, or return them all. Returning removes drawn bless and curse tokens from the bag unless you choose to keep them.
