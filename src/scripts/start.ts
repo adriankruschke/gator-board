@@ -18,6 +18,7 @@ if (session && current) {
   $<HTMLImageElement>('session-thumb').src = thumbImage(current.code);
   $('session-title').textContent = `${current.name}, ${current.subname}`;
   $('session-stats').innerHTML =
+    `<span class="pip clue">${session.c}</span> Clues ` +
     `<span class="pip resource">${session.r}</span> Resources ` +
     `<span class="pip health">${session.h}</span> Health ` +
     `<span class="pip sanity">${session.s}</span> Sanity`;

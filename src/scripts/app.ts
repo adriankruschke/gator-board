@@ -9,7 +9,7 @@ import type { Difficulty, Token } from './tokens';
 import { tokenUse } from './tokenArt';
 import { LEGACY_INVESTIGATOR, backImage, cardImage, findInvestigator, thumbImage } from './investigators';
 
-const STAT_NAMES: Record<Stat, string> = { r: 'Resources', h: 'Health', s: 'Sanity' };
+const STAT_NAMES: Record<Stat, string> = { c: 'Clues', r: 'Resources', h: 'Health', s: 'Sanity' };
 
 const stage = document.getElementById('stage')!;
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -120,7 +120,7 @@ function renderLog() {
   for (let i = state.log.length - 1; i >= 0; i--) rows.push(entryRow(state.log[i], i === currentIndex));
   rows.push(
     `<li class="entry origin"><span class="entry-stat">Start</span>` +
-      `<span class="entry-change entry-wide">${investigator.name} · Resources ${defaults.r} · Health ${defaults.h} · Sanity ${defaults.s}</span></li>`,
+      `<span class="entry-change entry-wide">${investigator.name} · Clues ${defaults.c} · Resources ${defaults.r} · Health ${defaults.h} · Sanity ${defaults.s}</span></li>`,
   );
   logList.innerHTML = rows.join('');
 }
@@ -295,7 +295,8 @@ const actions: Record<string, () => void> = {
   },
   'ask-reset': () =>
     askConfirm('Reset the campaign?',
-      `Resources, health and sanity go back to <strong>${defaults.r}</strong>, <strong>${defaults.h}</strong> and ` +
+      `Clues, resources, health and sanity go back to <strong>${defaults.c}</strong>, <strong>${defaults.r}</strong>, ` +
+      `<strong>${defaults.h}</strong> and ` +
       `<strong>${defaults.s}</strong>, the chaos bag returns to its default setup, and the entire campaign log is erased. ` +
       'This can’t be undone.',
       'Reset everything', () => {

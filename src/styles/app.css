@@ -94,11 +94,12 @@ svg {
 }
 
 /*
- * Both trackers sit on parchment plaques. The health / sanity plaque covers the icons printed on
+ * The trackers sit on parchment plaques. The health / sanity plaque covers the icons printed on
  * the card, which every card image is aligned to.
  */
 .stats-main,
-.stats-resource {
+.stats-resource,
+.stats-clue {
   top: 79.8%;
   height: 12.8%;
   border: 0.3cqw solid var(--leather);
@@ -115,7 +116,12 @@ svg {
 }
 
 .stats-resource {
-  left: 37.4%;
+  left: 38.2%;
+  width: 21%;
+}
+
+.stats-clue {
+  left: 16.2%;
   width: 21%;
 }
 
@@ -149,6 +155,10 @@ svg {
 
 .stat-crate .icon img {
   width: 7cqw;
+}
+
+.stat-clue .icon img {
+  width: 7.6cqw;
 }
 
 .value {
@@ -202,6 +212,17 @@ svg {
   font-size: 5cqw;
 }
 
+.stat-clue .value span {
+  font-size: 6.2cqw;
+  -webkit-text-stroke: 0.42cqw #2c3a06;
+  text-shadow: 0 0 0.6cqw rgb(25 35 5 / 0.75);
+  translate: 0 0.1cqw;
+}
+
+.stat-clue .value[data-len='2'] span {
+  font-size: 5.2cqw;
+}
+
 .stage:not(.ready) .value span {
   visibility: hidden;
 }
@@ -239,6 +260,10 @@ svg {
   color: #5a3113;
 }
 
+.stat-clue .arrow {
+  color: #455a10;
+}
+
 .arrow:active:not(:disabled) {
   transform: scale(0.86);
   background: rgb(80 50 20 / 0.08);
@@ -250,13 +275,20 @@ svg {
 
 /* ---------- Floating controls ---------- */
 
+/* One column down the left edge so the trackers can use the bottom of the card. */
 .controls {
   position: absolute;
   left: 1.6cqw;
   bottom: 1.8cqw;
+  width: 5.8cqw;
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 1cqw;
+}
+
+.controls-gap {
+  height: 0.8cqw;
 }
 
 .round {
@@ -271,15 +303,6 @@ svg {
   color: #f3e3bd;
   box-shadow: 0 0.3cqw 0.9cqw rgb(0 0 0 / 0.55), inset 0 0 0 0.12cqw rgb(0 0 0 / 0.5);
   transition: transform 90ms ease, opacity 150ms ease;
-}
-
-.side-controls {
-  position: absolute;
-  left: 1.6cqw;
-  bottom: 9.4cqw;
-  display: flex;
-  flex-direction: column;
-  gap: 1cqw;
 }
 
 a.round {

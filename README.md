@@ -10,8 +10,8 @@ A landscape, full-screen investigator board built with Astro and tuned for a rec
 
 ## Board features
 
-- Resource, health and sanity trackers with arrows (0–99). They start at 5 resources plus the investigator's printed health and sanity. The health / sanity plaque sits over the icons printed on the card.
-- Side buttons: back to the start page, view the card back, full screen.
+- Clue, resource, health and sanity trackers with arrows (0–99). They start at 0 clues and 5 resources plus the investigator's printed health and sanity. The health / sanity plaque sits over the icons printed on the card.
+- A button column down the left edge: back to the start page, view the card back, full screen, undo, redo, campaign log and chaos bag.
 - A campaign log (book button) with undo and redo. Taps on the same stat within 3 seconds merge into one entry.
 - A chaos bag (bag button):
   - **Set up:** seed the bag from any campaign and difficulty (data in `src/scripts/tokens.ts`).

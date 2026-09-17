@@ -25,6 +25,10 @@ const icons = {
   <main class="stage" id="stage">
     <img class="card" id="card" width="2800" height="2010" alt="" draggable="false" />
 
+    <section class="stats stats-clue" aria-label="Clues">
+      <Stat stat="c" label="Clues" icon="clue" />
+    </section>
+
     <section class="stats stats-resource" aria-label="Resources">
       <Stat stat="r" label="Resources" icon="crate" />
     </section>
@@ -34,7 +38,7 @@ const icons = {
       <Stat stat="s" label="Sanity" icon="brain" />
     </section>
 
-    <nav class="side-controls" aria-label="Session">
+    <nav class="controls" aria-label="Controls">
       <a class="round" href="/" aria-label="Choose investigator">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.home} /></svg>
       </a>
@@ -44,20 +48,18 @@ const icons = {
       <button class="round" data-action="fullscreen" aria-label="Toggle full screen" hidden>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.fullscreen} /></svg>
       </button>
-    </nav>
-
-    <nav class="controls" aria-label="Controls">
+      <span class="controls-gap" aria-hidden="true"></span>
       <button class="round" data-action="undo" aria-label="Undo">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.undo} /></svg>
+      </button>
+      <button class="round" data-action="redo" aria-label="Redo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.redo} /></svg>
       </button>
       <button class="round round-main" data-action="open-log" aria-label="Open campaign log">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.log} /></svg>
       </button>
       <button class="round round-main" data-action="open-bag" aria-label="Open chaos bag">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.bag} /></svg>
-      </button>
-      <button class="round" data-action="redo" aria-label="Redo">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icons.redo} /></svg>
       </button>
     </nav>
 
@@ -71,7 +73,7 @@ const icons = {
         </button>
       </header>
       <p class="log-summary">
-        Resources <strong data-summary="r"></strong><span class="dot">·</span>Health <strong data-summary="h"></strong><span class="dot">·</span>Sanity <strong data-summary="s"></strong>
+        Clues <strong data-summary="c"></strong><span class="dot">·</span>Resources <strong data-summary="r"></strong><span class="dot">·</span>Health <strong data-summary="h"></strong><span class="dot">·</span>Sanity <strong data-summary="s"></strong>
       </p>
       <div class="log-actions">
         <button class="ink-btn" data-action="undo">

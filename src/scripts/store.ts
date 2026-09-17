@@ -7,7 +7,7 @@ import {
 import type { Bag, Difficulty, Token } from './tokens';
 import { LEGACY_INVESTIGATOR, findInvestigator } from './investigators';
 
-export type Stat = 'r' | 'h' | 's';
+export type Stat = 'c' | 'r' | 'h' | 's';
 
 /** A health / sanity / resource change. These are the entries undo and redo act on. */
 export interface StatEntry {
@@ -47,6 +47,7 @@ export interface ChaosBag {
 export interface State {
   /** Investigator card code; decides the board image and starting health / sanity. */
   inv: string;
+  c: number;
   r: number;
   h: number;
   s: number;
@@ -57,9 +58,9 @@ export interface State {
 export const STARTING_RESOURCES = 5;
 
 /** Starting resources, health and sanity for an investigator. */
-export function defaultsFor(inv: string): { r: number; h: number; s: number } {
+export function defaultsFor(inv: string): Record<Stat, number> {
   const i = findInvestigator(inv);
-  return { r: STARTING_RESOURCES, h: i?.health ?? 7, s: i?.sanity ?? 8 };
+  return { c: 0, r: STARTING_RESOURCES, h: i?.health ?? 7, s: i?.sanity ?? 8 };
 }
 export const MIN = 0;
 export const MAX = 99;
@@ -295,7 +296,7 @@ const isDifficulty = (x: unknown): x is Difficulty => DIFFICULTIES.includes(x as
 function validEntry(e: any): e is Entry {
   if (!e || !isInt(e.t)) return false;
   switch (e.y) {
-    case 'stat': return ['r', 'h', 's'].includes(e.k) && isStatValue(e.from) && isStatValue(e.to);
+    case 'stat': return ['c', 'r', 'h', 's'].includes(e.k) && isStatValue(e.from) && isStatValue(e.to);
     case 'draw':
     case 'seal':
     case 'release': return isTokenList(e.tokens);
@@ -314,7 +315,7 @@ function validBag(b: any): b is ChaosBag {
 }
 
 function serialize(s: State): string {
-  return encodeURIComponent(JSON.stringify({ v: 4, inv: s.inv, r: s.r, h: s.h, s: s.s, bag: s.bag, log: s.log }));
+  return encodeURIComponent(JSON.stringify({ v: 4, inv: s.inv, c: s.c, r: s.r, h: s.h, s: s.s, bag: s.bag, log: s.log }));
 }
 
 function deserialize(raw: string): State | null {
@@ -323,9 +324,11 @@ function deserialize(raw: string): State | null {
   // v3 predates choosing an investigator.
   if (data?.v === 3) data.inv = LEGACY_INVESTIGATOR;
   else if (data?.v !== 4 || !findInvestigator(data.inv)) return null;
-  if (![data.r, data.h, data.s].every(isStatValue)) return null;
+  // Sessions saved before the clue tracker have no clues.
+  data.c ??= 0;
+  if (![data.c, data.r, data.h, data.s].every(isStatValue)) return null;
   if (!validBag(data.bag) || !Array.isArray(data.log) || !data.log.every(validEntry)) return null;
-  return { inv: data.inv, r: data.r, h: data.h, s: data.s, bag: data.bag, log: data.log };
+  return { inv: data.inv, c: data.c, r: data.r, h: data.h, s: data.s, bag: data.bag, log: data.log };
 }
 
 /** v1 "v1|h|s|cursor|entries" and v2 "v2|r|h|s|cursor|entries" predate the chaos bag. */
@@ -342,7 +345,7 @@ function deserializeLegacy(raw: string): State | null {
   }
   if (![r, h, s].every(isStatValue) || !isInt(cursor) || cursor < 0 || cursor > log.length) return null;
   log.forEach((e, i) => { if (i >= cursor) e.undone = true; });
-  return { inv: LEGACY_INVESTIGATOR, r, h, s, bag: initialBag(), log };
+  return { inv: LEGACY_INVESTIGATOR, c: 0, r, h, s, bag: initialBag(), log };
 }
 
 // ---- Cookies (chunked, since a single cookie is limited to ~4KB)

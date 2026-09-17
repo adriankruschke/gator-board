@@ -240,6 +240,10 @@ svg {
   background: var(--resource);
 }
 
+.pip.clue {
+  background: #6b8a1e;
+}
+
 /* ---------- Toolbar ---------- */
 
 .toolbar {
