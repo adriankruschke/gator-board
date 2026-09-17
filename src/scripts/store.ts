@@ -5,7 +5,7 @@ import {
   findCampaign, startingBag,
 } from './tokens';
 import type { Bag, Difficulty, Token } from './tokens';
-import { LEGACY_INVESTIGATOR, findInvestigator } from './investigators';
+import { BASE, LEGACY_INVESTIGATOR, findInvestigator } from './investigators';
 
 export type Stat = 'c' | 'r' | 'h' | 's';
 
@@ -361,7 +361,8 @@ function readCookies(): Map<string, string> {
 
 function writeCookie(name: string, value: string, maxAge: number) {
   const secure = location.protocol === 'https:' ? '; Secure' : '';
-  document.cookie = `${name}=${value}; Max-Age=${maxAge}; Path=/; SameSite=Lax${secure}`;
+  // Scoped to this app, since a GitHub Pages domain is shared with other project sites.
+  document.cookie = `${name}=${value}; Max-Age=${maxAge}; Path=${BASE}; SameSite=Lax${secure}`;
 }
 
 /** The saved session, or null when there isn't a valid one. */
