@@ -19,7 +19,7 @@ Live at **https://adriankruschke.github.io/gator-board/** — published by the w
 
 - Clue, resource, health and sanity trackers with arrows (0–99). They start at 0 clues and 5 resources plus the investigator's printed health and sanity. The health / sanity plaque sits over the icons printed on the card.
 - A button column down the left edge: back to the start page, view the card back, full screen, undo, redo and the campaign log.
-- The chaos bag opens from a pouch icon sitting on the counter row, sized to match the counter icons. The game has no flat chaos bag symbol, so this icon is drawn to match the token art (`public/img/bag.svg`).
+- The chaos bag opens from the elder sign token on the counter row, sized to match the counter icons.
 - A campaign log (book button) with undo and redo. Taps on the same stat within 3 seconds merge into one entry.
 - The chaos bag panel:
   - **Set up:** seed the bag from any campaign and difficulty (data in `src/scripts/tokens.ts`).
@@ -39,7 +39,8 @@ Live at **https://adriankruschke.github.io/gator-board/** — published by the w
 ## Card images
 
 The four tracker icons in `public/img/` are the game's own token art (damage, horror, resource and
-clue tokens), upscaled with Real-ESRGAN.
+clue tokens), upscaled with Real-ESRGAN. `public/tok/` holds the game's art for all 20 chaos
+tokens, used everywhere tokens appear (the bag, the log and the setup preview).
 
 `public/inv/` holds, per investigator code: `<code>.webp` (front, 2800×2010), `<code>-back.webp` (2400 px wide, where available) and `<code>-thumb.webp`. Fronts were upscaled with Real-ESRGAN (two ×4 passes for small scans), rotated to landscape where needed, and aligned so the printed health / sanity icons land in the same place on every card. Investigator data lives in `src/data/investigators.json`.
 

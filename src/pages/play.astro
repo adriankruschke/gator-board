@@ -5,7 +5,7 @@ import '../styles/bag.css';
 import Stat from '../components/Stat.astro';
 import ChaosBag from '../components/ChaosBag.astro';
 import Disclaimer from '../components/Disclaimer.astro';
-import { tokenSprite } from '../scripts/tokenArt';
+import { tokenImage } from '../scripts/tokenArt';
 
 const icons = {
   undo: 'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11',
@@ -17,12 +17,9 @@ const icons = {
   fullscreen: 'M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3',
   close: 'M18 6 6 18M6 6l12 12',
 };
-
-const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 ---
 
 <Layout title="Gator Board">
-  <Fragment set:html={tokenSprite()} />
   <div class="backdrop" id="backdrop" aria-hidden="true"></div>
 
   <main class="stage" id="stage">
@@ -30,7 +27,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 
     <section class="stats stats-bag" aria-label="Chaos bag">
       <button class="bag-open" data-action="open-bag" aria-label="Open chaos bag">
-        <img src={`${base}img/bag.svg`} alt="" draggable="false" />
+        <img src={tokenImage('elder_sign')} alt="" draggable="false" />
       </button>
     </section>
 
