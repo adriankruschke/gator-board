@@ -16,18 +16,27 @@ function context(): AudioContext | null {
   return ctx;
 }
 
-let horn: HTMLAudioElement | null = null;
+const samples = new Map<string, HTMLAudioElement>();
 
-/** The losing horn, for drawing the auto-fail token. */
-export function playHorn() {
+function playSample(file: string) {
   try {
-    horn ??= new Audio(`${BASE}snd/losing-horn.mp3`);
-    horn.currentTime = 0;
-    void horn.play();
+    let audio = samples.get(file);
+    if (!audio) {
+      audio = new Audio(`${BASE}snd/${file}`);
+      samples.set(file, audio);
+    }
+    audio.currentTime = 0;
+    void audio.play();
   } catch {
     // Audio is a nicety; never let it break a tap.
   }
 }
+
+/** The losing horn, for drawing the auto-fail token. */
+export const playHorn = () => playSample('losing-horn.mp3');
+
+/** A rising power-up, for drawing the elder sign. */
+export const playElderSign = () => playSample('elder-sign.wav');
 
 let noise: AudioBuffer | null = null;
 
