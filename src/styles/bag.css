@@ -563,6 +563,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5cqh;
+  width: max-content;
   max-height: 78cqh;
   max-width: 100%;
   overflow-y: auto;
@@ -570,10 +571,25 @@
 }
 
 .token-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.8cqh;
+}
+
+.token-count {
+  min-width: 3.4cqh;
+  text-align: right;
+  color: #d9c8a2;
+  font-size: calc(var(--token-size, 5cqh) * 0.46);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.token-row-items {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.4cqh;
 }
 

@@ -329,7 +329,9 @@ const actions: Record<string, () => void> = {
     $('token-view-title').textContent = `${plural(total, 'token')} in the bag`;
     $('token-view-grid').style.setProperty('--token-size', `${size.toFixed(2)}cqh`);
     $('token-view-grid').innerHTML = rows
-      .map((r) => `<div class="token-row">${tokenUse(r.token).repeat(r.count)}</div>`)
+      .map((r) =>
+        `<div class="token-row"><span class="token-count">${r.count}×</span>` +
+        `<span class="token-row-items">${tokenUse(r.token).repeat(r.count)}</span></div>`)
       .join('');
     $('token-view').hidden = false;
   },

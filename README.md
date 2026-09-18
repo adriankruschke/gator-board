@@ -24,7 +24,7 @@ Live at **https://adriankruschke.github.io/gator-board/** — published by the w
 - The chaos bag panel:
   - **Set up:** seed the bag from any campaign and difficulty (data in `src/scripts/tokens.ts`).
   - **Contents:** add or remove any token, including bless and curse, with no limit on how many of each (up to 99). Seal tokens and release them.
-  - **View all tokens in the bag:** a button in Contents shows every token currently in the bag, one row per kind of token with all of its copies across that row. Tokens shrink to keep every row on screen at once.
+  - **View all tokens in the bag:** a button in Contents shows every token currently in the bag, one row per kind of token: a count, then all of its copies laid out to the right. Rows share a left edge and the tokens shrink to keep every row on screen at once.
   - **Draw:** tap the bag or draw 1–5 at once, then "Draw another" as needed. Tap a drawn token to put just that one back, or return them all. Returning removes drawn bless and curse tokens from the bag unless you choose to keep them.
   - Keyboard: 1–9 draw that many, space draws or returns, 0 / Enter returns.
   - Every draw, return that removes bless/curse, token edit, seal, release and bag setup is written to the campaign log. Undo/redo only applies to resource, health and sanity changes.
