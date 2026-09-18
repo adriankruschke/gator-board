@@ -558,19 +558,26 @@
   font-style: italic;
 }
 
-/* Fills a column top to bottom, then starts another one. */
+/* Every kind of token on its own row, with all of its copies laid out across. */
 .token-view-grid {
   display: flex;
-  flex-flow: column wrap;
-  align-content: center;
-  justify-content: flex-start;
-  gap: 0.7cqw 1.4cqw;
-  max-height: 74cqh;
+  flex-direction: column;
+  gap: 0.5cqh;
+  max-height: 78cqh;
   max-width: 100%;
-  overflow: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.token-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4cqh;
 }
 
 .token-view-grid .token {
-  width: 6.4cqw;
+  width: var(--token-size, 5cqh);
   flex: none;
 }

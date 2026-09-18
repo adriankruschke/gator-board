@@ -322,9 +322,15 @@ const actions: Record<string, () => void> = {
       }),
   'view-tokens': () => {
     const { bag } = state;
-    const tokens = TOKENS.flatMap((t) => Array<Token>(inBag(bag, t)).fill(t));
-    $('token-view-title').textContent = `${plural(tokens.length, 'token')} in the bag`;
-    $('token-view-grid').innerHTML = tokens.map((t) => tokenUse(t)).join('');
+    // One row per kind of token, holding every copy of it that is in the bag.
+    const rows = TOKENS.map((t) => ({ token: t, count: inBag(bag, t) })).filter((r) => r.count > 0);
+    const size = Math.min(6, Math.max(2.6, 66 / Math.max(rows.length, 1)));
+    const total = rows.reduce((n, r) => n + r.count, 0);
+    $('token-view-title').textContent = `${plural(total, 'token')} in the bag`;
+    $('token-view-grid').style.setProperty('--token-size', `${size.toFixed(2)}cqh`);
+    $('token-view-grid').innerHTML = rows
+      .map((r) => `<div class="token-row">${tokenUse(r.token).repeat(r.count)}</div>`)
+      .join('');
     $('token-view').hidden = false;
   },
   'close-tokens': () => {
