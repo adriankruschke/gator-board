@@ -437,10 +437,18 @@ export function load(): State | null {
   }
 }
 
-/** Replaces any saved session with a fresh one for the investigator. */
+/** Replaces any saved session with a fresh one for the investigator, chaos bag included. */
 export function startSession(inv: string): State {
   clear();
   return save(initialState(inv));
+}
+
+/**
+ * Starts the investigator over — trackers, log and timer — while leaving the chaos bag exactly as
+ * it is, contents, bless and curse, sealed and drawn tokens and all.
+ */
+export function resetCharacter(state: State): State {
+  return save({ ...initialState(state.inv), bag: state.bag });
 }
 
 /** Persists the state and returns it (with the oldest history trimmed if it didn't fit). */

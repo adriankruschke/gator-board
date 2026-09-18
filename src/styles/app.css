@@ -680,6 +680,11 @@ a.round {
   gap: 1.2cqw;
 }
 
+/* The riskier second option sits on its own row, under the ordinary answer. */
+.confirm-actions .wide {
+  grid-column: 1 / -1;
+}
+
 /* ---------- Portrait hint ---------- */
 
 .rotate {

@@ -1,5 +1,6 @@
 import {
-  load, save, startSession, initialState, defaultsFor, addActiveTime, change, undo, redo, canUndo, canRedo, MIN, MAX,
+  load, save, startSession, resetCharacter, initialState, defaultsFor, addActiveTime,
+  change, undo, redo, canUndo, canRedo, MIN, MAX,
   draw, returnAll, returnOne, setCount, seal, release, clearBlessCurse, setupBag,
   total, inBag, outOfBag, bagSize, minCount, maxCount,
 } from './store';
@@ -39,6 +40,7 @@ $('backdrop').style.backgroundImage = `url('${thumbImage(investigator.code)}')`;
 stage.querySelector<HTMLElement>('[data-action="show-back"]')!.hidden = !investigator.back;
 let setupDifficulty: Difficulty = state.bag.difficulty;
 let pendingConfirm: (() => void) | null = null;
+let pendingExtra: (() => void) | null = null;
 /** Set for the render right after a pull, so the token animates in only then. */
 let drewTokens = false;
 /** When the board last became visible; 0 while it is hidden. */
@@ -317,11 +319,22 @@ function selectTab(name: string) {
   $('tab-setup').hidden = name !== 'setup';
 }
 
-function askConfirm(title: string, text: string, ok: string, onConfirm: () => void) {
+/** `extra` adds a second, riskier answer that asks its own question rather than acting. */
+function askConfirm(
+  title: string,
+  text: string,
+  ok: string,
+  onConfirm: () => void,
+  extra?: { label: string; onPick: () => void },
+) {
   $('confirm-title').textContent = title;
   $('confirm-text').innerHTML = text;
   stage.querySelector<HTMLElement>('[data-action="confirm-ok"]')!.textContent = ok;
+  const extraButton = stage.querySelector<HTMLElement>('[data-action="confirm-extra"]')!;
+  extraButton.textContent = extra?.label ?? '';
+  extraButton.hidden = !extra;
   pendingConfirm = onConfirm;
+  pendingExtra = extra?.onPick ?? null;
   confirmEl.hidden = false;
   stage.querySelector<HTMLButtonElement>('[data-action="confirm-cancel"]')!.focus();
 }
@@ -329,6 +342,8 @@ function askConfirm(title: string, text: string, ok: string, onConfirm: () => vo
 function closeConfirm() {
   confirmEl.hidden = true;
   pendingConfirm = null;
+  pendingExtra = null;
+  stage.querySelector<HTMLElement>('[data-action="confirm-extra"]')!.hidden = true;
 }
 
 const fsTarget = document.documentElement as HTMLElement & { webkitRequestFullscreen?: () => void };
@@ -399,10 +414,19 @@ const actions: Record<string, () => void> = {
   'ask-reset': () =>
     askConfirm('Reset the campaign?',
       `Clues, resources, health and sanity go back to <strong>${defaults.c}</strong>, <strong>${defaults.r}</strong>, ` +
-      `<strong>${defaults.h}</strong> and ` +
-      `<strong>${defaults.s}</strong>, the chaos bag returns to its default setup, and the entire campaign log is erased. ` +
-      'This can’t be undone.',
-      'Reset everything', () => {
+      `<strong>${defaults.h}</strong> and <strong>${defaults.s}</strong>, and the campaign log is erased. ` +
+      'Your chaos bag is left exactly as it is. This can’t be undone.',
+      'Reset, keep the bag',
+      () => {
+        state = resetCharacter(state);
+        render();
+      },
+      { label: 'Reset the chaos bag too…', onPick: () => actions['ask-reset-bag']() }),
+  'ask-reset-bag': () =>
+    askConfirm('Reset the chaos bag as well?',
+      `On top of the reset above, the bag is rebuilt for <strong>${campaignLabel(state.bag.campaign, state.bag.difficulty)}</strong>: ` +
+      'edited token counts, bless and curse, and anything drawn or sealed are all discarded.',
+      'Reset the bag too', () => {
         state = startSession(state.inv);
         render();
       }),
@@ -437,6 +461,11 @@ const actions: Record<string, () => void> = {
     const run = pendingConfirm;
     closeConfirm();
     run?.();
+  },
+  'confirm-extra': () => {
+    const ask = pendingExtra;
+    closeConfirm();
+    ask?.();
   },
   fullscreen: toggleFullscreen,
 };
