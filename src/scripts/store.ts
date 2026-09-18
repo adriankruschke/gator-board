@@ -53,6 +53,10 @@ export interface State {
   s: number;
   bag: ChaosBag;
   log: Entry[];
+  /** When the session began, in Unix seconds. */
+  started: number;
+  /** Time the board has actually been open and in front, in milliseconds. */
+  activeMs: number;
 }
 
 export const STARTING_RESOURCES = 5;
@@ -68,7 +72,13 @@ const MAX_ENTRIES = 500;
 /** Rapid taps on the same counter within this window collapse into one log entry. */
 const MERGE_WINDOW_S = 3;
 
-const COOKIE = 'gb';
+/**
+ * The cookie name carries the app's path. `document.cookie` hides which path a cookie came from,
+ * so two same-named cookies at different paths are impossible to tell apart; a distinct name per
+ * path keeps that from ever happening. Early builds wrote `gb_*` at the site root.
+ */
+const COOKIE = ('gb' + BASE).replace(/[^a-z0-9]+/gi, '_').replace(/_+$/, '');
+const LEGACY_COOKIE = 'gb';
 const CHUNK = 3500;
 const MAX_CHUNKS = 20;
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 400;
@@ -83,7 +93,12 @@ export const initialBag = (campaign = DEFAULT_CAMPAIGN, difficulty: Difficulty =
   sealed: [],
 });
 
-export const initialState = (inv: string): State => ({ inv, ...defaultsFor(inv), bag: initialBag(), log: [] });
+export const initialState = (inv: string): State =>
+  ({ inv, ...defaultsFor(inv), bag: initialBag(), log: [], started: Math.floor(Date.now() / 1000), activeMs: 0 });
+
+/** Adds foreground time. Elapsed time itself is always derived from timestamps, never counted. */
+export const addActiveTime = (state: State, ms: number): State =>
+  ms > 0 ? { ...state, activeMs: state.activeMs + Math.round(ms) } : state;
 
 const clamp = (n: number) => Math.min(MAX, Math.max(MIN, n));
 const now = () => Math.floor(Date.now() / 1000);
@@ -315,7 +330,10 @@ function validBag(b: any): b is ChaosBag {
 }
 
 function serialize(s: State): string {
-  return encodeURIComponent(JSON.stringify({ v: 4, inv: s.inv, c: s.c, r: s.r, h: s.h, s: s.s, bag: s.bag, log: s.log }));
+  return encodeURIComponent(JSON.stringify({
+    v: 4, inv: s.inv, c: s.c, r: s.r, h: s.h, s: s.s, bag: s.bag, log: s.log,
+    started: s.started, activeMs: s.activeMs,
+  }));
 }
 
 function deserialize(raw: string): State | null {
@@ -328,7 +346,13 @@ function deserialize(raw: string): State | null {
   data.c ??= 0;
   if (![data.c, data.r, data.h, data.s].every(isStatValue)) return null;
   if (!validBag(data.bag) || !Array.isArray(data.log) || !data.log.every(validEntry)) return null;
-  return { inv: data.inv, c: data.c, r: data.r, h: data.h, s: data.s, bag: data.bag, log: data.log };
+  // Sessions saved before the timer: treat the first log entry as the start.
+  if (!isInt(data.started)) data.started = data.log[0]?.t ?? Math.floor(Date.now() / 1000);
+  if (!isInt(data.activeMs) || data.activeMs < 0) data.activeMs = 0;
+  return {
+    inv: data.inv, c: data.c, r: data.r, h: data.h, s: data.s, bag: data.bag, log: data.log,
+    started: data.started, activeMs: data.activeMs,
+  };
 }
 
 /** v1 "v1|h|s|cursor|entries" and v2 "v2|r|h|s|cursor|entries" predate the chaos bag. */
@@ -345,39 +369,69 @@ function deserializeLegacy(raw: string): State | null {
   }
   if (![r, h, s].every(isStatValue) || !isInt(cursor) || cursor < 0 || cursor > log.length) return null;
   log.forEach((e, i) => { if (i >= cursor) e.undone = true; });
-  return { inv: LEGACY_INVESTIGATOR, c: 0, r, h, s, bag: initialBag(), log };
+  return {
+    inv: LEGACY_INVESTIGATOR, c: 0, r, h, s, bag: initialBag(), log,
+    started: log[0]?.t ?? Math.floor(Date.now() / 1000), activeMs: 0,
+  };
 }
 
 // ---- Cookies (chunked, since a single cookie is limited to ~4KB)
 
+function cookiePairs(): [string, string][] {
+  return (document.cookie ? document.cookie.split('; ') : []).map((pair) => {
+    const i = pair.indexOf('=');
+    return [pair.slice(0, i), pair.slice(i + 1)] as [string, string];
+  });
+}
+
 function readCookies(): Map<string, string> {
   const map = new Map<string, string>();
-  for (const pair of document.cookie ? document.cookie.split('; ') : []) {
-    const i = pair.indexOf('=');
-    map.set(pair.slice(0, i), pair.slice(i + 1));
-  }
+  // Browsers list the most specific path first, so the first copy of a name is this app's.
+  for (const [name, value] of cookiePairs()) if (!map.has(name)) map.set(name, value);
   return map;
 }
 
-function writeCookie(name: string, value: string, maxAge: number) {
+function writeCookie(name: string, value: string, maxAge: number, path = BASE) {
   const secure = location.protocol === 'https:' ? '; Secure' : '';
   // Scoped to this app, since a GitHub Pages domain is shared with other project sites.
-  document.cookie = `${name}=${value}; Max-Age=${maxAge}; Path=${BASE}; SameSite=Lax${secure}`;
+  document.cookie = `${name}=${value}; Max-Age=${maxAge}; Path=${path}; SameSite=Lax${secure}`;
+}
+
+/** Removes the `gb_*` cookies early builds wrote, at both the root and this app's path. */
+function dropLegacyCookies() {
+  for (const name of readCookies().keys()) {
+    if (name === `${LEGACY_COOKIE}_n` || /^gb_\d+$/.test(name)) {
+      writeCookie(name, '', 0, '/');
+      writeCookie(name, '', 0);
+    }
+  }
+}
+
+/** Reassembles the chunked value written under a cookie prefix, or null when it isn't there. */
+function readChunks(prefix: string): string | null {
+  const cookies = readCookies();
+  const count = Number(cookies.get(`${prefix}_n`));
+  if (!Number.isInteger(count) || count < 1 || count > MAX_CHUNKS) return null;
+  let raw = '';
+  for (let i = 0; i < count; i++) {
+    const chunk = cookies.get(`${prefix}_${i}`);
+    if (chunk === undefined) return null;
+    raw += chunk;
+  }
+  return raw;
 }
 
 /** The saved session, or null when there isn't a valid one. */
 export function load(): State | null {
   try {
-    const cookies = readCookies();
-    const count = Number(cookies.get(`${COOKIE}_n`));
-    if (!Number.isInteger(count) || count < 1 || count > MAX_CHUNKS) return null;
-    let raw = '';
-    for (let i = 0; i < count; i++) {
-      const chunk = cookies.get(`${COOKIE}_${i}`);
-      if (chunk === undefined) return null;
-      raw += chunk;
-    }
-    return deserialize(raw);
+    const raw = readChunks(COOKIE);
+    if (raw !== null) return deserialize(raw);
+
+    // Sessions saved by an early build: read once, then move them to this app's cookie.
+    const legacy = readChunks(LEGACY_COOKIE);
+    const state = legacy === null ? null : deserialize(legacy);
+    dropLegacyCookies();
+    return state && save(state);
   } catch {
     return null;
   }
@@ -411,4 +465,5 @@ export function clear() {
   for (const name of readCookies().keys()) {
     if (name === `${COOKIE}_n` || name.startsWith(`${COOKIE}_`)) writeCookie(name, '', 0);
   }
+  dropLegacyCookies();
 }

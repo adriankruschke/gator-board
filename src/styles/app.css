@@ -466,11 +466,19 @@ a.round {
 }
 
 .log-summary {
-  margin: 0.2cqw 0 1.4cqw;
+  margin: 0.2cqw 0 0.3cqw;
+  color: var(--ink-soft);
+  font-size: 1.9cqw;
+}
+
+.log-session {
+  margin: 0 0 1.4cqw;
   padding-bottom: 1.2cqw;
   border-bottom: 0.12cqw solid rgb(45 31 20 / 0.3);
   color: var(--ink-soft);
-  font-size: 1.9cqw;
+  font-size: 1.5cqw;
+  font-style: italic;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .log-summary strong {

@@ -1,5 +1,5 @@
 import {
-  load, save, startSession, initialState, defaultsFor, change, undo, redo, canUndo, canRedo, MIN, MAX,
+  load, save, startSession, initialState, defaultsFor, addActiveTime, change, undo, redo, canUndo, canRedo, MIN, MAX,
   draw, returnAll, returnOne, setCount, seal, release, clearBlessCurse, setupBag,
   total, inBag, outOfBag, bagSize, minCount, maxCount,
 } from './store';
@@ -41,6 +41,8 @@ let setupDifficulty: Difficulty = state.bag.difficulty;
 let pendingConfirm: (() => void) | null = null;
 /** Set for the render right after a pull, so the token animates in only then. */
 let drewTokens = false;
+/** When the board last became visible; 0 while it is hidden. */
+let resumedAt = document.visibilityState === 'visible' ? Date.now() : 0;
 
 const timeFmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
 const dayFmt = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
@@ -74,6 +76,24 @@ function renderStats() {
   for (const b of $$<HTMLButtonElement>('[data-action="undo"]')) b.disabled = !canUndo(state);
   for (const b of $$<HTMLButtonElement>('[data-action="redo"]')) b.disabled = !canRedo(state);
   for (const el of $$<HTMLElement>('[data-summary]')) el.textContent = String(state[el.dataset.summary as Stat]);
+  renderSession();
+}
+
+/** "2h 15m", "3d 4h", "45m" — coarse on purpose, so the display only needs a minute tick. */
+function duration(ms: number): string {
+  const minutes = Math.max(0, Math.floor(ms / 60000));
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  if (days) return `${days}d ${hours % 24}h`;
+  if (hours) return `${hours}h ${minutes % 60}m`;
+  return `${minutes}m`;
+}
+
+/** Both figures come from timestamps, so nothing drifts while the tab sleeps. */
+function renderSession() {
+  const since = Date.now() - state.started * 1000;
+  const played = state.activeMs + (resumedAt ? Date.now() - resumedAt : 0);
+  $('log-session').textContent = `Started ${duration(since)} ago · ${duration(played)} played`;
 }
 
 function entryRow(e: Entry, current: boolean): string {
@@ -211,6 +231,68 @@ function commit(next: State) {
   render();
 }
 
+// ---- Session timer
+//
+// Elapsed time is never counted, only derived: the session start is a stored timestamp and
+// foreground time accrues between visibility changes. The periodic save below is purely crash
+// insurance — it caps how much play time a force-quit can lose at one minute — and it only runs
+// while the board is actually on screen.
+
+const HEARTBEAT_MS = 60_000;
+let heartbeat: number | undefined;
+
+/** Folds the time since the last checkpoint into the session, and optionally saves it. */
+function checkpoint(persist: boolean) {
+  const elapsed = resumedAt ? Date.now() - resumedAt : 0;
+  if (resumedAt) resumedAt = Date.now();
+  const next = addActiveTime(state, elapsed);
+  if (next === state && !persist) return;
+  state = persist ? save(next) : next;
+}
+
+function startHeartbeat() {
+  if (heartbeat === undefined) heartbeat = window.setInterval(() => checkpoint(true), HEARTBEAT_MS);
+}
+
+function stopHeartbeat() {
+  if (heartbeat !== undefined) window.clearInterval(heartbeat);
+  heartbeat = undefined;
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    checkpoint(true);
+    resumedAt = 0;
+    stopHeartbeat();
+    stopSessionTick();
+  } else {
+    resumedAt = Date.now();
+    startHeartbeat();
+    if (logEl.classList.contains('open')) startSessionTick();
+    renderSession();
+  }
+});
+
+// More reliable than beforeunload on iOS.
+window.addEventListener('pagehide', () => checkpoint(true));
+
+if (resumedAt) startHeartbeat();
+
+// ---- The log's clock, which ticks only while the log is open
+
+let sessionTick: number | undefined;
+
+function startSessionTick() {
+  stopSessionTick();
+  renderSession();
+  sessionTick = window.setInterval(renderSession, 60_000);
+}
+
+function stopSessionTick() {
+  if (sessionTick !== undefined) window.clearInterval(sessionTick);
+  sessionTick = undefined;
+}
+
 // ---- Panels and dialogs
 
 function setPanel(el: HTMLElement, scrim: HTMLElement, open: boolean) {
@@ -281,8 +363,12 @@ const actions: Record<string, () => void> = {
   'open-log': () => {
     setPanel(logEl, logScrim, true);
     logList.scrollTop = 0;
+    startSessionTick();
   },
-  'close-log': () => setPanel(logEl, logScrim, false),
+  'close-log': () => {
+    setPanel(logEl, logScrim, false);
+    stopSessionTick();
+  },
   'open-bag': openBag,
   'close-bag': () => setPanel(bagEl, bagScrim, false),
   // With one token out, tapping it ends the pull; with several, it returns just that token.
