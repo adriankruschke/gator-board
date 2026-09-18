@@ -214,9 +214,15 @@ svg {
   stroke-linejoin: round;
 }
 
+/*
+ * Centred on the digits, not on the text box: EB Garamond's ascent and descent are lopsided and
+ * browsers disagree about which metrics to use, which left the numbers riding high on iPad.
+ * Trimming the box to cap height and baseline makes the centring identical everywhere.
+ */
 .pip {
-  display: inline-grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 1.7em;
   height: 1.7em;
   padding: 0 0.3em;
@@ -226,6 +232,16 @@ svg {
   font-size: 0.9em;
   font-variant-numeric: lining-nums;
   line-height: 1;
+  text-box: trim-both cap alphabetic;
+}
+
+/* Same result for browsers without text-box: drop the line box onto the baseline, then push it
+   down by the cap height so the digits land centred. */
+@supports not (text-box: trim-both cap alphabetic) {
+  .pip {
+    padding: 0.68em 0.3em 0;
+    line-height: 0;
+  }
 }
 
 .pip.health {
