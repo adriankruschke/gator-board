@@ -1,6 +1,6 @@
 // Sounds for the trackers and the chaos bag.
 
-import { BASE } from './investigators';
+import { asset } from './investigators';
 
 type Ctor = typeof AudioContext;
 const AudioCtx: Ctor | undefined =
@@ -22,7 +22,7 @@ function playSample(file: string) {
   try {
     let audio = samples.get(file);
     if (!audio) {
-      audio = new Audio(`${BASE}snd/${file}`);
+      audio = new Audio(asset(`snd/${file}`));
       samples.set(file, audio);
     }
     audio.currentTime = 0;

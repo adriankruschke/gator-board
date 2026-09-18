@@ -36,6 +36,7 @@ Live at **https://adriankruschke.github.io/gator-board/** — published by the w
 - Pulling a chaos token has its own sound (a cloth rustle and a soft thud) and animation: the token tumbles in and settles in about 0.8s. It plays only on a pull, not when returning tokens or editing the bag.
 - Pulling the auto-fail plays `public/snd/losing-horn.mp3` (the Price is Right losing horn) instead of the usual pull sound. The file came from orangefreesounds.com, which states "private use only"; the underlying sound belongs to the show's owners. It is not ours to license, so treat it as placeholder audio.
 - Every page carries the legal disclaimer above: a footer on the start page, one line in the corner of the board.
+- Files in `public/` (cards, token art, icons, sounds) are requested with a `?v=<build id>` stamp, set from the commit SHA on CI. GitHub Pages serves everything with a fixed `Cache-Control: max-age=600` and ignores `_headers`, so without the stamp a replaced image or sound could serve stale for ten minutes. The HTML itself still has that ten-minute window.
 - Search engines are told not to index the site: `robots` meta tag on both pages, `robots.txt`, and an `X-Robots-Tag` header in `public/_headers`.
   - The meta tag is what counts on GitHub Pages. Pages serves no custom headers, so `_headers` is ignored, and crawlers only read `robots.txt` from the domain root (`adriankruschke.github.io/robots.txt`), not from this project's subdirectory.
   - A published Pages site is reachable by anyone who has the URL; noindex only keeps it out of search results.

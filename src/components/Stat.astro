@@ -1,4 +1,6 @@
 ---
+import { asset } from '../scripts/investigators';
+
 interface Props {
   stat: string;
   label: string;
@@ -6,7 +8,6 @@ interface Props {
 }
 
 const { stat, label, icon } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 ---
 
 <div class={`stat stat-${icon}`}>
@@ -14,7 +15,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
     <svg viewBox="0 0 40 60" aria-hidden="true"><path d="M34 6 8 30l26 24c2 2 4 1 4-2V8c0-3-2-4-4-2Z" /></svg>
   </button>
   <div class="icon">
-    <img src={`${base}img/${icon}.webp`} alt="" draggable="false" />
+    <img src={asset(`img/${icon}.webp`)} alt="" draggable="false" />
     <output class="value" data-value={stat} aria-label={label}><span></span></output>
   </div>
   <button class="arrow arrow-right" data-stat={stat} data-delta="1" aria-label={`Increase ${label}`}>

@@ -33,6 +33,12 @@ export const findInvestigator = (code: string) => INVESTIGATORS.find((i) => i.co
 /** Site root, which is a subdirectory on GitHub Pages. Always ends with "/". */
 export const BASE = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 
-export const cardImage = (code: string) => `${BASE}inv/${code}.webp`;
-export const thumbImage = (code: string) => `${BASE}inv/${code}-thumb.webp`;
-export const backImage = (code: string) => `${BASE}inv/${code}-back.webp`;
+/**
+ * Files in public/ keep stable names, and GitHub Pages caches them for ten minutes with no way to
+ * say otherwise. Stamping the build id on the URL makes a deploy fetch them straight away.
+ */
+export const asset = (path: string) => `${BASE}${path}?v=${import.meta.env.PUBLIC_BUILD_ID ?? 'dev'}`;
+
+export const cardImage = (code: string) => asset(`inv/${code}.webp`);
+export const thumbImage = (code: string) => asset(`inv/${code}-thumb.webp`);
+export const backImage = (code: string) => asset(`inv/${code}-back.webp`);

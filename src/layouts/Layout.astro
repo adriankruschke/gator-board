@@ -2,6 +2,7 @@
 import '@fontsource/eb-garamond/500.css';
 import '@fontsource/eb-garamond/600.css';
 import '@fontsource/eb-garamond/500-italic.css';
+import { asset } from '../scripts/investigators';
 
 interface Props {
   title?: string;
@@ -9,7 +10,6 @@ interface Props {
 }
 
 const { title = 'Gator Board', bodyClass } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 ---
 
 <html lang="en">
@@ -23,9 +23,9 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Gator Board" />
     <meta name="theme-color" content="#1a120b" />
-    <link rel="manifest" href={`${base}manifest.webmanifest`} />
-    <link rel="apple-touch-icon" href={`${base}img/icon-180.png`} />
-    <link rel="icon" type="image/png" href={`${base}img/icon-180.png`} />
+    <link rel="manifest" href={asset('manifest.webmanifest')} />
+    <link rel="apple-touch-icon" href={asset('img/icon-180.png')} />
+    <link rel="icon" type="image/png" href={asset('img/icon-180.png')} />
     <slot name="head" />
     <title>{title}</title>
   </head>
